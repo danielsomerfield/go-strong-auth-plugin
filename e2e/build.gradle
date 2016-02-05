@@ -3,13 +3,106 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.apache.httpcomponents:httpclient:4.3.+'
+    }
+}
+
 dependencies {
+    testCompile 'info.cukes:cucumber-core:1.2.4'
+    testCompile 'info.cukes:cucumber-java:1.2.4'
+    testCompile 'com.google.guava:guava:19.0'
+    testCompile 'org.projectlombok:lombok:1.16.6'
     testCompile 'org.apache.httpcomponents:httpclient:4.5.1'
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task executeFeatures(type: JavaExec, dependsOn: 'startGoImage') {
+    main = "cucumber.api.cli.Main"
+    classpath += files(sourceSets.test.runtimeClasspath)
+    args += [
+            "--strict", "-t", "~@NYI",
+            '-g', 'com.thoughtworks.go.strongauth.glue',
+            '-p', 'pretty',
+            "${project.rootDir}/e2e/src/test/resources/features"
+    ]
+}
+
+task startGoImage(type: Exec) {
+    commandLine 'bin/run-go.sh'
+    doLast {
+        waitForGo()
+    }
+}
+
+task cleanup(type: Exec) {
+    commandLine 'bin/stop-go.sh'
+}
+
+task prepareGoImage(type: Exec) {
+    commandLine 'docker', 'build', '--tag', 'thoughtworks/strongauth-tests', '.'
+}
+
+executeFeatures.finalizedBy("cleanup")
+
+public String getGoHost() {
+    return "192.168.99.100";
+}
+
+def waitForGo() {
+    waitFor {
+        ping("http://${goHost}:${8153}")
+    }
+}
+
+//TODO: move utilities
+def getWaitTimeout() { 1000 * 60 }
+
+def waitFor(closure) {
+    long timeout = System.currentTimeMillis() + waitTimeout;
+    logger.info("Waiting for ${waitTimeout / 1000} seconds.")
+    while (System.currentTimeMillis() < timeout) {
+        if (closure() == true) {
+            return
+        }
+        Thread.sleep(2000)
+    }
+    throw new GradleException("Wait for expected condition timed out.")
+}
+
+
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.HttpClients
+
+def ping(String url) {
+
+    try {
+        logger.debug("Pinging app with url ${url}")
+        HttpUriRequest get = RequestBuilder.get().setConfig(RequestConfig.custom()
+                .setConnectionRequestTimeout(1000)
+                .setConnectTimeout(1000)
+                .build()).setUri(url).build()
+        HttpClients.createDefault().withCloseable() { client ->
+            client.execute(get).withCloseable() { response ->
+                return response.statusLine.statusCode == 200 || response.statusLine.statusCode == 301
+            }
+        }
+    }
+    catch (IOException ignored) {
+        println(ignored.message)
+        return false;
+    }
 }
