@@ -1,0 +1,4 @@
+rootProject.name = 'strong-auth'
+include 'e2e'
+findProject(':e2e')?.name = 'strong-auth-e2e'
+

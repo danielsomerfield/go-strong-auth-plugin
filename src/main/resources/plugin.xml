@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<go-plugin id="testplugin.somePlugin" version="1">
+    <about>
+        <name>Some plugin name</name>
+        <version>1.0.1</version>
+        <target-go-version>12.4</target-go-version>
+        <description>A file-based auth plugin that uses strong encryption algorithm and salts.</description>
+        <vendor>
+            <name>ThoughtWorks Go Team</name>
+            <url>www.thoughtworks.com</url>
+        </vendor>
+        <target-os>
+            <value>Linux</value>
+            <value>Windows</value>
+        </target-os>
+    </about>
+</go-plugin>
