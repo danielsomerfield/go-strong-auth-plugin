@@ -39,7 +39,7 @@ task executeFeatures(type: JavaExec, dependsOn: 'startGoImage') {
     ]
 }
 
-task startGoImage(type: Exec) {
+task startGoImage(type: Exec, dependsOn: 'prepareGoImage') {
     commandLine 'bin/run-go.sh'
     doLast {
         waitForGo()
@@ -102,7 +102,7 @@ def ping(String url) {
         }
     }
     catch (IOException ignored) {
-        println(ignored.message)
+        logger.debug(ignored.message)
         return false;
     }
 }

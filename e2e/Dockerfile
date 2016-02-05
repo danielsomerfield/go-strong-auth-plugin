@@ -5,4 +5,5 @@ RUN mkdir -p /var/lib/go-server/plugins/external
 RUN mkdir -p /var/lib/go-server/plugins/bundled
 RUN chown -R go:go /var/lib/go-server
 
-ADD build/libs/strong-auth* /var/lib/go-server/plugins/external/
+ADD deploy/strong-auth* /var/lib/go-server/plugins/external/
+VOLUME /var/lib/go-server/plugins/external/
