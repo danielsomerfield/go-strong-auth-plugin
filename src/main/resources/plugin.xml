@@ -12,6 +12,7 @@
         <target-os>
             <value>Linux</value>
             <value>Windows</value>
+            <value>Mac OS X</value>
         </target-os>
     </about>
 </go-plugin>

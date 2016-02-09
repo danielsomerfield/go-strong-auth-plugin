@@ -46,11 +46,14 @@ task startGoImage(type: Exec, dependsOn: 'prepareGoImage') {
     }
 }
 
-task cleanup(type: Exec) {
+task cleanup(dependsOn: 'stopGoImage') {
+}
+
+task stopGoImage(type: Exec) {
     commandLine 'bin/stop-go.sh'
 }
 
-task prepareGoImage(type: Exec) {
+task prepareGoImage(type: Exec, dependsOn: 'stopGoImage') {
     commandLine 'docker', 'build', '--tag', 'thoughtworks/strongauth-tests', '.'
 }
 
