@@ -2,9 +2,12 @@
 
 set -e
 
-if [ -e .strong-auth-test-id ]; then
-    CONTAINER_ID=`cat .strong-auth-test-id`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ -e $DIR/../.strong-auth-test-id ]; then
+    CONTAINER_ID=`cat $DIR/../.strong-auth-test-id`
     docker kill $CONTAINER_ID
-    rm .strong-auth-test-id
+    docker rm $CONTAINER_ID
+    rm $DIR/../.strong-auth-test-id
 fi
 
