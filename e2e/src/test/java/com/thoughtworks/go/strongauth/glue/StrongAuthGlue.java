@@ -1,5 +1,6 @@
 package com.thoughtworks.go.strongauth.glue;
 
+import com.thoughtworks.go.TestHelpers;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 public class StrongAuthGlue {
@@ -30,7 +32,7 @@ public class StrongAuthGlue {
 
     @Given("^Auth is disabled$")
     public void authIsDisabled() throws Throwable {
-
+        TestHelpers.get().disableAuth();
     }
 
     private void pingGo() throws IOException {
@@ -65,11 +67,16 @@ public class StrongAuthGlue {
         }).build();
     }
 
+    @Given("^Auth is enabled$")
+    public void authIsEnabled() throws Throwable {
+        TestHelpers.get().enableAuth();
+    }
 
-    //    public void testRedirectWithAuthConfigured() throws Exception {
-//        HttpGet get = new HttpGet(format("http://%s:8153/go/admin/pipeline/new?group=defaultGroup", getGoHost()));
-//        CloseableHttpClient client = httpClient();
-//        HttpResponse response = client.execute(get);
-//        assertThat(response.getStatusLine().getStatusCode(), is(HttpStatus.SC_MOVED_TEMPORARILY));
-//    }
+    @Then("^I am redirected to the login screen$")
+    public void iAmRedirectedToTheLoginScreen() throws Throwable {
+        assertThat(response.getStatusLine().getStatusCode(), is(HttpStatus.SC_MOVED_TEMPORARILY));
+        assertThat(response.getFirstHeader("Location"), is(notNullValue()));
+        assertThat(response.getFirstHeader("Location").getValue(), is("http://192.168.99.100:8153/go/auth/login"));
+    }
+
 }

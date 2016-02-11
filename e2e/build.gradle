@@ -39,8 +39,19 @@ task executeFeatures(type: JavaExec, dependsOn: 'startGoImage') {
     ]
 }
 
+task executeFeaturesDev(type: JavaExec) {
+    main = "cucumber.api.cli.Main"
+    classpath += files(sourceSets.test.runtimeClasspath)
+    args += [
+            "--strict", "-t", "~@NYI",
+            '-g', 'com.thoughtworks.go.strongauth.glue',
+            '-p', 'pretty',
+            "${project.rootDir}/e2e/src/test/resources/features"
+    ]
+}
+
 task startGoImage(type: Exec, dependsOn: 'prepareGoImage') {
-    commandLine 'bin/run-go.sh'
+    commandLine "$rootDir/e2e/bin/run-go.sh"
     doLast {
         waitForGo()
     }
@@ -50,7 +61,7 @@ task cleanup(dependsOn: 'stopGoImage') {
 }
 
 task stopGoImage(type: Exec) {
-    commandLine 'bin/stop-go.sh'
+    commandLine "$rootDir/e2e/bin/stop-go.sh"
 }
 
 task prepareGoImage(type: Exec, dependsOn: 'stopGoImage') {

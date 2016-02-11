@@ -3,8 +3,8 @@
     <about>
         <name>Strong Auth Plugin</name>
         <version>1.0.1</version>
-        <target-go-version>15.2</target-go-version>
-        <description>A file-based auth plugin that uses strong encryption algorithm and salts.</description>
+        <target-go-version>16.1.0</target-go-version>
+        <description>A file-based auth plugin that uses configurable strong hash algorithm and salts.</description>
         <vendor>
             <name>ThoughtWorks Go Team</name>
             <url>www.thoughtworks.com</url>
