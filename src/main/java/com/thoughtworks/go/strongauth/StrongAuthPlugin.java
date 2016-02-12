@@ -37,7 +37,7 @@ public class StrongAuthPlugin implements GoPlugin {
         handlers.put(CALL_FROM_SERVER_VALIDATE_CONFIGURATION, PluginSettingsHandler.validateConfiguration());
 
         handlers.put(CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler());
-        handlers.put(CALL_FROM_SERVER_AUTHENTICATE_USER, new AuthenticationHandler());
+//        handlers.put(CALL_FROM_SERVER_AUTHENTICATE_USER, new AuthenticationHandler());
         handlers.put(CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler());
         handlers.put(CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier));
     }
