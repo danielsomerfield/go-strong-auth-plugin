@@ -13,9 +13,11 @@ Feature: Go Strong Auth
     When I make a request to the go home page
     Then I am redirected to the login screen
 
-#  Scenario: Auth enabled with username / password
-#    Given Go CD is running
-#    Given Auth is enabled
-#    Given A login exists for "Daniel", "Somerfield"
-#    When I login
-#    Then I am redirected
+  @NYI
+  Scenario: Auth enabled with username / password
+    Given Go CD is running
+    Given Auth is enabled
+    Given A login exists for "aUser", "aSecret"
+    When I login
+    When I make a request to the go home page
+    Then I see the go home page
