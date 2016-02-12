@@ -98,8 +98,8 @@ public class StrongAuthGlue {
 
     @Given("^A login exists for \"([^\"]*)\", \"([^\"]*)\"$")
     public void aLoginExistsFor(String username, String password) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
-        throw new PendingException();
+        testHelpers.clearAuthFile();
+        testHelpers.createPasswordEntryFor(username, password);
     }
 
     @When("^I login$")
