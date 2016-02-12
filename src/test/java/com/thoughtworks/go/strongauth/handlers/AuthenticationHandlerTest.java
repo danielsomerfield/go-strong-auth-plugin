@@ -50,7 +50,7 @@ public class AuthenticationHandlerTest {
     public void testSuccessfulAuthentication() throws Exception {
 
         GoPluginApiRequest goRequest = mock(GoPluginApiRequest.class);
-        when(requestDecoder.decode(goRequest)).thenReturn(new AuthenticationRequest("username1", "good-password"));
+        when(requestDecoder.decode(goRequest)).thenReturn(Optional.of(new AuthenticationRequest("username1", "good-password")));
         GoPluginApiResponse actualResponse = authenticationHandler.call(goRequest);
         assertThat(actualResponse, is(loginSuccessResponse));
         verify(goUserAPI).authenticateUser(new GoUser("username1"));
@@ -59,7 +59,7 @@ public class AuthenticationHandlerTest {
     @Test
     public void testUnsuccessfulAuthentication() throws Exception {
         GoPluginApiRequest goRequest = mock(GoPluginApiRequest.class);
-        when(requestDecoder.decode(goRequest)).thenReturn(new AuthenticationRequest("username1", "bad-password"));
+        when(requestDecoder.decode(goRequest)).thenReturn(Optional.of(new AuthenticationRequest("username1", "bad-password")));
         GoPluginApiResponse actualResponse = authenticationHandler.call(goRequest);
         assertThat(actualResponse, is(loginPageResponse));
         verify(goUserAPI, never()).authenticateUser(any(GoUser.class));
