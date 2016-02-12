@@ -18,7 +18,7 @@ public class PluginConfigurationHandler implements Handler {
     public GoPluginApiResponse call(GoPluginApiRequest request) {
         String responseBody = toJson(create()
                 .add(CONFIG_DISPLAY_NAME, "Guest login")
-                .add(CONFIG_DISPLAY_IMAGE_URL, getImage())
+//                .add(CONFIG_DISPLAY_IMAGE_URL, getImage())
                 .add(CONFIG_WEB_AUTH, true)
                 .add(CONFIG_PASSWORD_AUTH, true)
                 .build());

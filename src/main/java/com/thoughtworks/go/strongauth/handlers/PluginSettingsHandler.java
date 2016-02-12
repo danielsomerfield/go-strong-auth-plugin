@@ -26,15 +26,9 @@ public class PluginSettingsHandler {
             @Override
             public GoPluginApiResponse call(GoPluginApiRequest request) {
                 Map<Object, Object> configResponse = create()
-//                        .add(SETTINGS_USERNAME_KEY, create()
-//                                .add("display-name", "Guest user's username")
-//                                .add("required", true))
-//                        .add(SETTINGS_USER_DISPLAY_NAME_KEY, create()
-//                                .add("display-name", "Guest user's display name")
-//                                .add("required", true))
-//                        .add(SETTINGS_USER_EMAIL_KEY, create()
-//                                .add("display-name", "Guest user's username")
-//                                .add("required", true))
+                        .add("dummy-config", create()
+                                .add("display-name", "Dummy")
+                                .add("required", false))
                         .build();
 
                 return DefaultGoPluginApiResponse.success(toJson(configResponse));

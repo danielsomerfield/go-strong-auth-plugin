@@ -8,6 +8,7 @@ import com.thoughtworks.go.plugin.api.exceptions.UnhandledRequestTypeException;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.go.strongauth.handlers.Handler;
+import com.thoughtworks.go.strongauth.handlers.PluginConfigurationHandler;
 import com.thoughtworks.go.strongauth.handlers.PluginSettingsHandler;
 import com.thoughtworks.go.strongauth.util.Action;
 import com.thoughtworks.go.strongauth.util.Wrapper;
@@ -17,7 +18,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.thoughtworks.go.strongauth.util.Constants.*;
 import static com.thoughtworks.go.strongauth.util.Logging.withLogging;
 import static java.util.Arrays.asList;
 
@@ -28,6 +28,10 @@ public class StrongAuthPlugin implements GoPlugin {
     private Wrapper<GoApplicationAccessor> accessorWrapper = new Wrapper<GoApplicationAccessor>();
 
     public static final String CALL_FROM_SERVER_AUTHENTICATE_USER = "go.authentication.authenticate-user";
+    public static final String CALL_FROM_SERVER_PLUGIN_CONFIGURATION = "go.authentication.plugin-configuration";
+    public static final String CALL_FROM_SERVER_GET_CONFIGURATION = "go.plugin-settings.get-configuration";
+    public static final String CALL_FROM_SERVER_GET_VIEW = "go.plugin-settings.get-view";
+    public static final String CALL_FROM_SERVER_VALIDATE_CONFIGURATION = "go.plugin-settings.validate-configuration";
 
     public StrongAuthPlugin() {
         goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
@@ -37,9 +41,9 @@ public class StrongAuthPlugin implements GoPlugin {
         handlers.put(CALL_FROM_SERVER_GET_CONFIGURATION, PluginSettingsHandler.getConfiguration());
         handlers.put(CALL_FROM_SERVER_GET_VIEW, PluginSettingsHandler.getView());
         handlers.put(CALL_FROM_SERVER_VALIDATE_CONFIGURATION, PluginSettingsHandler.validateConfiguration());
+        handlers.put(CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler());
         handlers.put(CALL_FROM_SERVER_AUTHENTICATE_USER, ComponentFactory.authenticationHandler());
 
-//        handlers.put(CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler());
 //        handlers.put(CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler());
 //        handlers.put(CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier));
     }
