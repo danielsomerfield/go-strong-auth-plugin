@@ -4,11 +4,11 @@ import com.google.common.base.Optional;
 
 public class Authenticator {
 
-    public Authenticator(PrincipalSource principalSource) {
+    public Authenticator(PrincipalDetailSource principalDetailSource) {
 
     }
 
     public Optional<Principal> authenticate(String username, String password) {
-        return null;
+        return Optional.absent();
     }
 }

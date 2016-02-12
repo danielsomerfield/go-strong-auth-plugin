@@ -59,7 +59,7 @@ public class TestHelpers {
         byte [] salt = createSalt();
         String saltString = Base64.encodeBytes(salt);
         String hash = createHash(salt, password, iterations, keyLength);
-        String entry = format("%s:%s:%s:%s:%s", username, saltString, hash, String.valueOf(iterations), String.valueOf(keyLength));
+        String entry = format("%s:%s:%s:%s(%s, %s)", username, saltString, hash, "PBKDF2WithHmacSHA1", String.valueOf(iterations), String.valueOf(keyLength));
         System.out.println("------------> " + entry);
         executeHelper("insert-password-entry.py", entry);
     }

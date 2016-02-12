@@ -1,7 +1,7 @@
 package com.thoughtworks.go.strongauth;
 
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
-import com.thoughtworks.go.strongauth.authentication.PrincipalSource;
+import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.handlers.AuthenticationHandler;
 import com.thoughtworks.go.strongauth.handlers.Handler;
@@ -30,10 +30,8 @@ public class ComponentFactory {
         return new Authenticator(principalSource());
     }
 
-    private static PrincipalSource principalSource() {
-        return new PrincipalSource() {
-
-        };
+    private static PrincipalDetailSource principalSource() {
+        throw new UnsupportedOperationException("NYI");
     }
 
     private static GoAuthenticationRequestDecoder requestDecoder() {
