@@ -26,15 +26,15 @@ public class PluginSettingsHandler {
             @Override
             public GoPluginApiResponse call(GoPluginApiRequest request) {
                 Map<Object, Object> configResponse = create()
-                        .add(SETTINGS_USERNAME_KEY, create()
-                                .add("display-name", "Guest user's username")
-                                .add("required", true))
-                        .add(SETTINGS_USER_DISPLAY_NAME_KEY, create()
-                                .add("display-name", "Guest user's display name")
-                                .add("required", true))
-                        .add(SETTINGS_USER_EMAIL_KEY, create()
-                                .add("display-name", "Guest user's username")
-                                .add("required", true))
+//                        .add(SETTINGS_USERNAME_KEY, create()
+//                                .add("display-name", "Guest user's username")
+//                                .add("required", true))
+//                        .add(SETTINGS_USER_DISPLAY_NAME_KEY, create()
+//                                .add("display-name", "Guest user's display name")
+//                                .add("required", true))
+//                        .add(SETTINGS_USER_EMAIL_KEY, create()
+//                                .add("display-name", "Guest user's username")
+//                                .add("required", true))
                         .build();
 
                 return DefaultGoPluginApiResponse.success(toJson(configResponse));
@@ -64,12 +64,12 @@ public class PluginSettingsHandler {
                 Map<String, Map<String, String>> settings = (Map<String, Map<String, String>>) toMap(request.requestBody()).get("plugin-settings");
                 List<Map<Object, Object>> validationResponse = new ArrayList<Map<Object, Object>>();
 
-                if (isEmpty(settings, SETTINGS_USERNAME_KEY))
-                    addValidationError(validationResponse, SETTINGS_USERNAME_KEY, "Username");
-                if (isEmpty(settings, SETTINGS_USER_DISPLAY_NAME_KEY))
-                    addValidationError(validationResponse, SETTINGS_USER_DISPLAY_NAME_KEY, "Display name");
-                if (isEmpty(settings, SETTINGS_USER_EMAIL_KEY))
-                    addValidationError(validationResponse, SETTINGS_USER_EMAIL_KEY, "Email address");
+//                if (isEmpty(settings, SETTINGS_USERNAME_KEY))
+//                    addValidationError(validationResponse, SETTINGS_USERNAME_KEY, "Username");
+//                if (isEmpty(settings, SETTINGS_USER_DISPLAY_NAME_KEY))
+//                    addValidationError(validationResponse, SETTINGS_USER_DISPLAY_NAME_KEY, "Display name");
+//                if (isEmpty(settings, SETTINGS_USER_EMAIL_KEY))
+//                    addValidationError(validationResponse, SETTINGS_USER_EMAIL_KEY, "Email address");
 
                 return DefaultGoPluginApiResponse.success(toJson(validationResponse));
             }

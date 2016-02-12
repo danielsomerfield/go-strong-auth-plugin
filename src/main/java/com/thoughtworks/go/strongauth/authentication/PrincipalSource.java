@@ -1,3 +1,3 @@
 package com.thoughtworks.go.strongauth.authentication;
 
-interface PrincipalSource {}
+public interface PrincipalSource {}
