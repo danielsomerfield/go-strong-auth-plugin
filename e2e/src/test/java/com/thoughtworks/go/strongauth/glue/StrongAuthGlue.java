@@ -1,6 +1,7 @@
 package com.thoughtworks.go.strongauth.glue;
 
 import com.thoughtworks.go.TestHelpers;
+import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -24,6 +25,7 @@ import static org.junit.Assert.assertThat;
 public class StrongAuthGlue {
 
     private HttpResponse response;
+    private TestHelpers testHelpers = new TestHelpers();
 
     @Given("^Go CD is running$")
     public void goCDIsRunning() throws Throwable {
@@ -32,7 +34,7 @@ public class StrongAuthGlue {
 
     @Given("^Auth is disabled$")
     public void authIsDisabled() throws Throwable {
-        TestHelpers.get().disableAuth();
+        testHelpers.disableAuth();
     }
 
     private void pingGo() throws IOException {
@@ -69,7 +71,7 @@ public class StrongAuthGlue {
 
     @Given("^Auth is enabled$")
     public void authIsEnabled() throws Throwable {
-        TestHelpers.get().enableAuth();
+        testHelpers.enableAuth();
     }
 
     @Then("^I am redirected to the login screen$")
@@ -79,4 +81,8 @@ public class StrongAuthGlue {
         assertThat(response.getFirstHeader("Location").getValue(), is("http://192.168.99.100:8153/go/auth/login"));
     }
 
+    @Given("^There are no existing users$")
+    public void thereAreNoExistingUsers() throws Throwable {
+        testHelpers.clearAuthFile();
+    }
 }
