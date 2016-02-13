@@ -13,7 +13,7 @@ public class Constants {
     public static final String API_CALL_PLUGIN_SETTINGS_GET = "go.processor.plugin-settings.get";
     public static final String API_CALL_AUTHENTICATE_USER = "go.processor.authentication.authenticate-user";
 
-    public static final String PLUGIN_ID = "gocd.guest.user.auth.plugin";
+    public static final String PLUGIN_ID = "strongauth";
 
     public static final String AUTH_API_USER_KEY = "user";
     public static final String AUTH_API_USERNAME_KEY = "username";

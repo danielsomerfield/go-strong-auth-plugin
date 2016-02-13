@@ -17,7 +17,7 @@ public class Logging {
             return response;
 
         } catch (RuntimeException e) {
-            String failureMessage = messagePrefix + " - Failed to handle request";
+            String failureMessage = messagePrefix + " -     Failed to handle request";
             logger.error(failureMessage + ": " + stringRepresentationOfRequest);
             throw e;
         }
