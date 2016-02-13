@@ -57,7 +57,7 @@ public class Authenticator {
                         hashConfig.getKeySize());
 
                 try {
-                    byte[] key = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
+                    byte[] key = SecretKeyFactory.getInstance(hashConfig.getAlgorithm()).generateSecret(spec).getEncoded();
                     return Arrays.equals(Hex.decodeHex(principalDetail.getPasswordHash().toCharArray()), key) ?
                             Optional.of(new Principal(principalDetail.getUsername())) :
                             Optional.<Principal>absent();
