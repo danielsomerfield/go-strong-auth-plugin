@@ -2,8 +2,10 @@ package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.util.Functional;
 import lombok.SneakyThrows;
+import lombok.Value;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -11,9 +13,11 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.Integer.parseInt;
 
 public class Authenticator {
 
@@ -32,28 +36,56 @@ public class Authenticator {
         });
     }
 
-    @SneakyThrows(UnsupportedEncodingException.class)
-    private static Optional<Principal> toPrincipal(PrincipalDetail principalDetail, String password) {
+    private static Optional<Principal> toPrincipal(final PrincipalDetail principalDetail, final String password) {
 
-        String hashConfig = principalDetail.getHashConfiguration();
+        Optional<HashConfig> maybeHashConfig = parseHashConfig(principalDetail.getHashConfiguration());
+        return Functional.flatMap(maybeHashConfig, new Function<HashConfig, Optional<Principal>>() {
 
-        PBEKeySpec spec = new PBEKeySpec(
-                password.toCharArray(),
-                principalDetail.getSalt().getBytes("UTF-8"),
-                10000,
-                256);
+            @Override
+            @SneakyThrows(UnsupportedEncodingException.class)
+            public Optional<Principal> apply(HashConfig hashConfig) {
+                PBEKeySpec spec = new PBEKeySpec(
+                        password.toCharArray(),
+                        principalDetail.getSalt().getBytes("UTF-8"),
+                        hashConfig.getIterations(),
+                        hashConfig.getKeySize());
 
-        try {
-            byte[] key = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
-            return Arrays.equals(Hex.decodeHex(principalDetail.getPasswordHash().toCharArray()), key) ?
-                    Optional.of(new Principal(principalDetail.getUsername())) :
-                    Optional.<Principal>absent();
+                try {
+                    byte[] key = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
+                    return Arrays.equals(Hex.decodeHex(principalDetail.getPasswordHash().toCharArray()), key) ?
+                            Optional.of(new Principal(principalDetail.getUsername())) :
+                            Optional.<Principal>absent();
 
-        } catch (DecoderException e) {
-            //TODO: Log problem
-            return Optional.absent();
-        } catch (GeneralSecurityException e) {
-            //TODO: Log problem
+                } catch (DecoderException e) {
+                    //TODO: Log problem
+                    return Optional.absent();
+                } catch (GeneralSecurityException e) {
+                    //TODO: Log problem
+                    return Optional.absent();
+                }
+            }
+        });
+
+    }
+
+    @Value
+    private static class HashConfig {
+        private final String algorithm;
+        private final int iterations;
+        private final int keySize;
+    }
+
+    private static final Pattern HASH_CONFIG_PATTERN = Pattern.compile("^(\\w+)\\((\\d+), (\\d+)\\)$");
+
+    private static Optional<HashConfig> parseHashConfig(String configString) {
+        final Matcher matcher = HASH_CONFIG_PATTERN.matcher(configString);
+        if (matcher.find()) {
+            return Optional.of(new HashConfig(
+                    matcher.group(1),
+                    parseInt(matcher.group(2)),
+                    parseInt(matcher.group(3)))
+            );
+        } else {
             return Optional.absent();
         }
     }
