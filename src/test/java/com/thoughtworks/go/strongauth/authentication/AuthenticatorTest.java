@@ -1,6 +1,7 @@
 package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Optional;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ import static org.mockito.Mockito.when;
 public class AuthenticatorTest {
 
     private PrincipalDetailSource principalDetailSource = mock(PrincipalDetailSource.class);
-    private Authenticator authenticator = new Authenticator(principalDetailSource);
+    private Authenticator authenticator = new Authenticator(principalDetailSource, Logger.getLoggerFor(AuthenticatorTest.class));
 
     @Before
     public void setup() {

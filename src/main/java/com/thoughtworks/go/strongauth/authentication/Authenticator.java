@@ -22,9 +22,15 @@ import static java.lang.Integer.parseInt;
 public class Authenticator {
 
     private PrincipalDetailSource principalDetailSource;
+    private Logger logger;
 
-    public Authenticator(PrincipalDetailSource principalDetailSource) {
+    public Authenticator(
+            PrincipalDetailSource principalDetailSource,
+            Logger logger
+
+    ) {
         this.principalDetailSource = principalDetailSource;
+        this.logger = logger;
     }
 
     public Optional<Principal> authenticate(final String username, final String password) {
@@ -36,7 +42,7 @@ public class Authenticator {
         });
     }
 
-    private static Optional<Principal> toPrincipal(final PrincipalDetail principalDetail, final String password) {
+    private Optional<Principal> toPrincipal(final PrincipalDetail principalDetail, final String password) {
 
         Optional<HashConfig> maybeHashConfig = parseHashConfig(principalDetail.getHashConfiguration());
         return Functional.flatMap(maybeHashConfig, new Function<HashConfig, Optional<Principal>>() {
@@ -56,11 +62,8 @@ public class Authenticator {
                             Optional.of(new Principal(principalDetail.getUsername())) :
                             Optional.<Principal>absent();
 
-                } catch (DecoderException e) {
-                    //TODO: Log problem
-                    return Optional.absent();
-                } catch (GeneralSecurityException e) {
-                    //TODO: Log problem
+                } catch (DecoderException | GeneralSecurityException e) {
+                    logger.warn("Failed to read principal entry.", e);
                     return Optional.absent();
                 }
             }
