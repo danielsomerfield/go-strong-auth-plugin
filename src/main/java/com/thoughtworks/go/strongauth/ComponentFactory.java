@@ -1,15 +1,16 @@
 package com.thoughtworks.go.strongauth;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
-import com.thoughtworks.go.strongauth.handlers.AuthenticationHandler;
-import com.thoughtworks.go.strongauth.handlers.Handler;
-import com.thoughtworks.go.strongauth.handlers.Handlers;
+import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
@@ -18,11 +19,22 @@ import static java.util.Arrays.asList;
 
 public class ComponentFactory {
 
-    public static final String pluginId = Constants.PLUGIN_ID;
+    private static final String CALL_FROM_SERVER_GET_CONFIGURATION = "go.plugin-settings.get-configuration";
+    private static final String CALL_FROM_SERVER_AUTHENTICATE_USER = "go.authentication.authenticate-user";
+    private static final String CALL_FROM_SERVER_PLUGIN_CONFIGURATION = "go.authentication.plugin-configuration";
+    private static final String CALL_FROM_SERVER_GET_VIEW = "go.plugin-settings.get-view";
+    private static final String CALL_FROM_SERVER_VALIDATE_CONFIGURATION = "go.plugin-settings.validate-configuration";
 
-    private static GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
+    public final String pluginId = Constants.PLUGIN_ID;
+    private final GoApplicationAccessorSource goApplicationAccessor;
 
-    public static Handler authenticationHandler() {
+    private GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
+
+    public ComponentFactory(GoApplicationAccessorSource goApplicationAccessorSource) {
+        this.goApplicationAccessor = goApplicationAccessorSource;
+    }
+
+    public Handler authenticationHandler() {
         return new AuthenticationHandler(
                 requestDecoder(),
                 authenticator(),
@@ -31,24 +43,28 @@ public class ComponentFactory {
         );
     }
 
-    private static Logger logger() {
+    private Logger logger() {
         return Logger.getLoggerFor(ComponentFactory.class);
     }
 
-    private static RedirectResponseEncoder redirectEncoder() {
+    private RedirectResponseEncoder redirectEncoder() {
         return new RedirectResponseEncoder();
     }
 
-    private static GoUserAPI goUserAPI() {
-        return new GoUserAPI();
+    private GoUserAPI goUserAPI() {
+        return new GoUserAPI(goPluginIdentifier(), goApplicationAccessor());
     }
 
-    private static Authenticator authenticator() {
+    private GoApplicationAccessor goApplicationAccessor() {
+        return this.goApplicationAccessor.getGoApplicationAccessor();
+    }
+
+    private Authenticator authenticator() {
         return new Authenticator(principalSource(), logger());
     }
 
-    private static PrincipalDetailSource principalSource() {
-        return new PrincipalDetailSource(){
+    private PrincipalDetailSource principalSource() {
+        return new PrincipalDetailSource() {
             @Override
             public Optional<PrincipalDetail> byUsername(String username) {
                 throw new UnsupportedOperationException("NYI");
@@ -56,15 +72,25 @@ public class ComponentFactory {
         };
     }
 
-    private static GoAuthenticationRequestDecoder requestDecoder() {
+    private GoAuthenticationRequestDecoder requestDecoder() {
         return new GoAuthenticationRequestDecoder();
     }
 
-    public static GoPluginIdentifier goPluginIdentifier() {
+    public GoPluginIdentifier goPluginIdentifier() {
         return goPluginIdentifier;
     }
 
-    public static Handlers handlers() {
-        return new Handlers();
+    public Handlers handlers() {
+        return new Handlers(
+                ImmutableMap.of(
+                        CALL_FROM_SERVER_GET_CONFIGURATION, PluginSettingsHandler.getConfiguration(),
+                        CALL_FROM_SERVER_GET_VIEW, PluginSettingsHandler.getView(),
+                        CALL_FROM_SERVER_VALIDATE_CONFIGURATION, PluginSettingsHandler.validateConfiguration(),
+                        CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler(),
+                        CALL_FROM_SERVER_AUTHENTICATE_USER, authenticationHandler()
+//            CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler(),
+//            CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier)
+                )
+        );
     }
 }

@@ -7,28 +7,29 @@ import com.thoughtworks.go.plugin.api.annotation.Extension;
 import com.thoughtworks.go.plugin.api.exceptions.UnhandledRequestTypeException;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
+import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.handlers.Handlers;
 import com.thoughtworks.go.strongauth.util.Action;
-import com.thoughtworks.go.strongauth.util.Wrapper;
 
 import static com.thoughtworks.go.strongauth.util.Logging.withLogging;
 
 @Extension
-public class StrongAuthPlugin implements GoPlugin {
+public class StrongAuthPlugin implements GoPlugin, GoApplicationAccessorSource {
 
-    private Handlers handlers = ComponentFactory.handlers();
-    private final GoPluginIdentifier goPluginIdentifier;
-    private Wrapper<GoApplicationAccessor> accessorWrapper = new Wrapper<>();
+    private ComponentFactory componentFactory = new ComponentFactory(this);
+    private GoPluginIdentifier goPluginIdentifier;
+    private GoApplicationAccessor goApplicationAccessor;
+    private Handlers handlers;
 
     public StrongAuthPlugin() {
-        goPluginIdentifier = ComponentFactory.goPluginIdentifier();
+
     }
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        /* This call happens too late for the handlers to be given the accessor. So, give them a
-         * wrapper instead (earlier, in constructor) and fill up the wrapper with the accessor now. */
-        accessorWrapper.holdOnTo(goApplicationAccessor);
+        goPluginIdentifier = componentFactory.goPluginIdentifier();
+        this.goApplicationAccessor = goApplicationAccessor;
+        this.handlers = componentFactory.handlers();
     }
 
     @Override
@@ -44,6 +45,14 @@ public class StrongAuthPlugin implements GoPlugin {
                 return handlers.get(request.requestName()).call(request);
             }
         });
+    }
+
+    @Override
+    public GoApplicationAccessor getGoApplicationAccessor() {
+        if (this.goApplicationAccessor == null) {
+            throw new RuntimeException("You cannot get the accessor until initialization is complete");
+        }
+        return this.goApplicationAccessor;
     }
 
 //    @Value

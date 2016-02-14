@@ -10,8 +10,6 @@ import com.thoughtworks.go.plugin.api.response.GoApiResponse;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.go.strongauth.util.Action;
 import com.thoughtworks.go.strongauth.util.MapBuilder;
-import com.thoughtworks.go.strongauth.util.Resources;
-import com.thoughtworks.go.strongauth.util.Wrapper;
 import static com.thoughtworks.go.strongauth.util.Constants.*;
 
 import java.util.Map;
@@ -30,11 +28,11 @@ import static com.thoughtworks.go.strongauth.util.Resources.get;
 public class PluginIndexRequestHandler implements Handler {
     private final Logger logger = Logger.getLoggerFor(PluginIndexRequestHandler.class);
 
-    private Wrapper<GoApplicationAccessor> accessorWrapper;
+    private GoApplicationAccessor accessor;
     private GoPluginIdentifier goPluginIdentifier;
 
-    public PluginIndexRequestHandler(Wrapper<GoApplicationAccessor> accessorWrapper, GoPluginIdentifier goPluginIdentifier) {
-        this.accessorWrapper = accessorWrapper;
+    public PluginIndexRequestHandler(GoApplicationAccessor accessor, GoPluginIdentifier goPluginIdentifier) {
+        this.accessor = accessor;
         this.goPluginIdentifier = goPluginIdentifier;
     }
 
@@ -103,7 +101,7 @@ public class PluginIndexRequestHandler implements Handler {
         return withLogging("From plugin to server", apiRequest, new Action<DefaultGoApiRequest, GoApiResponse>() {
             @Override
             public GoApiResponse call(DefaultGoApiRequest request) {
-                return accessorWrapper.get().submit(request);
+                return accessor.submit(request);
             }
         });
     }
