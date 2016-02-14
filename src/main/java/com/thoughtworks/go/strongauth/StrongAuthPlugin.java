@@ -17,7 +17,7 @@ import static com.thoughtworks.go.strongauth.util.Logging.withLogging;
 public class StrongAuthPlugin implements GoPlugin, GoApplicationAccessorSource {
 
     private ComponentFactory componentFactory = new ComponentFactory(this);
-    private GoPluginIdentifier goPluginIdentifier;
+    private GoPluginIdentifier goPluginIdentifier = componentFactory.goPluginIdentifier();
     private GoApplicationAccessor goApplicationAccessor;
     private Handlers handlers;
 
@@ -27,7 +27,6 @@ public class StrongAuthPlugin implements GoPlugin, GoApplicationAccessorSource {
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        goPluginIdentifier = componentFactory.goPluginIdentifier();
         this.goApplicationAccessor = goApplicationAccessor;
         this.handlers = componentFactory.handlers();
     }
