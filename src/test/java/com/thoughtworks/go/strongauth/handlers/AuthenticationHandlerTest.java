@@ -11,6 +11,7 @@ import com.thoughtworks.go.strongauth.goAPI.GoUser;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.AuthenticationResponseEncoder;
+import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
 import lombok.Value;
 import org.junit.Before;
@@ -26,24 +27,24 @@ public class AuthenticationHandlerTest {
 
     private GoAuthenticationRequestDecoder requestDecoder = mock(GoAuthenticationRequestDecoder.class);
     private Authenticator authenticator = mock(Authenticator.class);
-    private RedirectResponseEncoder redirectResponseEncoder = mock(RedirectResponseEncoder.class);
-    private GoUserAPI goUserAPI = mock(GoUserAPI.class);
+    private GoUserEncoder userEncoder = mock(GoUserEncoder.class);
+
     private AuthenticationHandler authenticationHandler = new AuthenticationHandler(
             requestDecoder,
             authenticator,
-            goUserAPI,
-            redirectResponseEncoder
+            userEncoder
     );
 
     GoPluginApiResponse loginSuccessResponse = mock(GoPluginApiResponse.class);
-    GoPluginApiResponse loginPageResponse = mock(GoPluginApiResponse.class);
+    GoPluginApiResponse loginFailedResponse = mock(GoPluginApiResponse.class);
+
 
     @Before
     public void setup() {
         when(authenticator.authenticate(eq("username1"), anyString())).thenReturn(Optional.<Principal>absent());
         when(authenticator.authenticate("username1", "good-password")).thenReturn(Optional.of(new Principal("username1")));
-        when(redirectResponseEncoder.redirectToServerBase()).thenReturn(loginSuccessResponse);
-        when(redirectResponseEncoder.redirectToLoginPage()).thenReturn(loginPageResponse);
+        when(userEncoder.noUser()).thenReturn(loginFailedResponse);
+        when(userEncoder.encode(new GoUser("username1"))).thenReturn(loginSuccessResponse);
     }
 
     @Test
@@ -53,7 +54,6 @@ public class AuthenticationHandlerTest {
         when(requestDecoder.decode(goRequest)).thenReturn(Optional.of(new AuthenticationRequest("username1", "good-password")));
         GoPluginApiResponse actualResponse = authenticationHandler.call(goRequest);
         assertThat(actualResponse, is(loginSuccessResponse));
-        verify(goUserAPI).authenticateUser(new GoUser("username1"));
     }
 
     @Test
@@ -61,8 +61,7 @@ public class AuthenticationHandlerTest {
         GoPluginApiRequest goRequest = mock(GoPluginApiRequest.class);
         when(requestDecoder.decode(goRequest)).thenReturn(Optional.of(new AuthenticationRequest("username1", "bad-password")));
         GoPluginApiResponse actualResponse = authenticationHandler.call(goRequest);
-        assertThat(actualResponse, is(loginPageResponse));
-        verify(goUserAPI, never()).authenticateUser(any(GoUser.class));
+        assertThat(actualResponse, is(loginFailedResponse));
     }
 
 }

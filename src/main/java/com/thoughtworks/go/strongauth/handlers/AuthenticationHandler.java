@@ -8,27 +8,22 @@ import com.thoughtworks.go.strongauth.authentication.AuthenticationRequest;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.Principal;
 import com.thoughtworks.go.strongauth.goAPI.GoUser;
-import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
-import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
+import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.util.Functional;
 
 public class AuthenticationHandler implements Handler {
     private final GoAuthenticationRequestDecoder requestDecoder;
     private final Authenticator authenticator;
-    private final GoUserAPI goUserAPI;
-    private final RedirectResponseEncoder redirectResponseEncoder;
+    private final GoUserEncoder userEncoder;
 
     public AuthenticationHandler(
             GoAuthenticationRequestDecoder requestDecoder,
-            Authenticator authenticator,
-            GoUserAPI goUserAPI,
-            RedirectResponseEncoder redirectResponseEncoder) {
+            Authenticator authenticator, GoUserEncoder userEncoder) {
 
         this.requestDecoder = requestDecoder;
         this.authenticator = authenticator;
-        this.goUserAPI = goUserAPI;
-        this.redirectResponseEncoder = redirectResponseEncoder;
+        this.userEncoder = userEncoder;
     }
 
     @Override
@@ -46,10 +41,9 @@ public class AuthenticationHandler implements Handler {
         });
 
         if (maybePrincipal.isPresent()) {
-            goUserAPI.authenticateUser(new GoUser(maybePrincipal.get().getId()));
-            return redirectResponseEncoder.redirectToServerBase();
+            return userEncoder.encode(new GoUser(maybePrincipal.get().getId()));
         } else {
-            return redirectResponseEncoder.redirectToLoginPage();
+            return userEncoder.noUser();
         }
     }
 }

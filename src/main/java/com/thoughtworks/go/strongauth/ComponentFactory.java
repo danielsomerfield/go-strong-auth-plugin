@@ -13,6 +13,7 @@ import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
+import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
 import org.apache.commons.io.IOUtils;
 
@@ -47,9 +48,12 @@ public class ComponentFactory {
         return new AuthenticationHandler(
                 requestDecoder(),
                 authenticator(),
-                goUserAPI(),
-                redirectEncoder()
+                goUserEncoder()
         );
+    }
+
+    private GoUserEncoder goUserEncoder() {
+        return new GoUserEncoder();
     }
 
     private RedirectResponseEncoder redirectEncoder() {

@@ -19,24 +19,31 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 
 public class Authenticator {
 
+    public final String pluginId = Constants.PLUGIN_ID;
     private static final Logger LOGGER = Logger.getLoggerFor(Authenticator.class);
 
     public Authenticator(PrincipalDetailSource principalDetailSource) {
         this.principalDetailSource = principalDetailSource;
     }
     private PrincipalDetailSource principalDetailSource;
-    public final String pluginId = Constants.PLUGIN_ID;
 
     public Optional<Principal> authenticate(final String username, final String password) {
-        return Functional.flatMap(principalDetailSource.byUsername(username), new Function<PrincipalDetail, Optional<Principal>>() {
+        LOGGER.info(format("Login attempt for user %s", username));
+        Optional<Principal> maybePrincipal = Functional.flatMap(principalDetailSource.byUsername(username), new Function<PrincipalDetail, Optional<Principal>>() {
             @Override
             public Optional<Principal> apply(PrincipalDetail principalDetail) {
                 return toPrincipal(principalDetail, password);
             }
         });
+
+        if (!maybePrincipal.isPresent()) {
+            LOGGER.info(format("Login attempt for user %s failed.", username));
+        }
+        return maybePrincipal;
     }
 
     private Optional<Principal> toPrincipal(final PrincipalDetail principalDetail, final String password) {
