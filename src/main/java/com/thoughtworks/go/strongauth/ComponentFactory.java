@@ -8,12 +8,15 @@ import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.goAPI.GoAPIMessageBuilder;
 import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
+
+import java.net.URI;
 
 import static java.util.Arrays.asList;
 
@@ -48,11 +51,19 @@ public class ComponentFactory {
     }
 
     private RedirectResponseEncoder redirectEncoder() {
-        return new RedirectResponseEncoder();
+        return new RedirectResponseEncoder(getServerRoot());
+    }
+
+    private URI getServerRoot() {
+        return URI.create("http://192.168.99.100:8153");
     }
 
     private GoUserAPI goUserAPI() {
-        return new GoUserAPI(goPluginIdentifier(), goApplicationAccessor());
+        return new GoUserAPI(goApplicationAccessor(), goAPIMessageBuilder());
+    }
+
+    private GoAPIMessageBuilder goAPIMessageBuilder() {
+        return new GoAPIMessageBuilder(goPluginIdentifier());
     }
 
     private GoApplicationAccessor goApplicationAccessor() {

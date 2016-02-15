@@ -12,7 +12,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class GoUserAPITest {
 
@@ -20,10 +19,10 @@ public class GoUserAPITest {
     public void testAuthenticateUser() throws Exception {
         final GoApplicationAccessor goApplicationAccessor = mock(GoApplicationAccessor.class);
         final GoPluginIdentifier goPluginIdentifier = mock(GoPluginIdentifier.class);
-        when(goPluginIdentifier.getExtension()).thenReturn("authentication");
+        final GoAPIMessageBuilder goAPIMessageBuilder = new GoAPIMessageBuilder(goPluginIdentifier);
 
         GoUser goUser = new GoUser("go-uzer");
-        GoUserAPI goUserAPI = new GoUserAPI(goPluginIdentifier, goApplicationAccessor);
+        GoUserAPI goUserAPI = new GoUserAPI(goApplicationAccessor, goAPIMessageBuilder);
         goUserAPI.authenticateUser(goUser);
 
         final ArgumentCaptor<GoApiRequest> requestCaptor = ArgumentCaptor.forClass(GoApiRequest.class);

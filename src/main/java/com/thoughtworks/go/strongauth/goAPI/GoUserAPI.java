@@ -2,42 +2,36 @@ package com.thoughtworks.go.strongauth.goAPI;
 
 import com.google.common.collect.ImmutableMap;
 import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
-import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
-import com.thoughtworks.go.plugin.api.request.DefaultGoApiRequest;
 import com.thoughtworks.go.plugin.api.request.GoApiRequest;
-import com.thoughtworks.go.strongauth.util.Json;
 
 import java.util.Map;
 
+import static com.thoughtworks.go.strongauth.util.Json.toJson;
+
 public class GoUserAPI {
 
-    private final GoPluginIdentifier goPluginIdentifier;
     private final GoApplicationAccessor goApplicationAccessor;
+    private final GoAPIMessageBuilder goAPIMessageBuilder;
 
     public GoUserAPI(
-            GoPluginIdentifier goPluginIdentifier,
-            GoApplicationAccessor goApplicationAccessor
-
+            GoApplicationAccessor goApplicationAccessor,
+            GoAPIMessageBuilder goAPIMessageBuilder
     ) {
-        this.goPluginIdentifier = goPluginIdentifier;
         this.goApplicationAccessor = goApplicationAccessor;
+        this.goAPIMessageBuilder = goAPIMessageBuilder;
     }
 
     public void authenticateUser(GoUser user) {
-        Map<String, String> userMap = ImmutableMap.of("username", user.getUsername());
-        GoApiRequest request = createAuthenticatUserRequest(userMap);
+        Map<String, ImmutableMap<String, String>> userMap = createUserMap(user);
+        GoApiRequest request = goAPIMessageBuilder.createAPIRequest(
+                "go.processor.authentication.authenticate-user",
+                toJson(userMap)
+        );
         goApplicationAccessor.submit(request);
     }
 
-    private GoApiRequest createAuthenticatUserRequest(Map<String, String> userMap) {
-        Map<String, ?> messageMap = ImmutableMap.of("user", userMap);
-        String messageString = Json.toJson(messageMap);
-        DefaultGoApiRequest authRequest = new DefaultGoApiRequest("go.processor.authentication.authenticate-user",
-                "1.0",
-                goPluginIdentifier
-        );
-        authRequest.setRequestBody(messageString);
-        return authRequest;
+    private ImmutableMap<String, ImmutableMap<String, String>> createUserMap(GoUser user) {
+        return ImmutableMap.of("user", ImmutableMap.of("username", user.getUsername()));
     }
 
 }
