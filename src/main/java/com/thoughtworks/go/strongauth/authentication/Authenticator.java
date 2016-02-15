@@ -3,6 +3,7 @@ package com.thoughtworks.go.strongauth.authentication;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.thoughtworks.go.plugin.api.logging.Logger;
+import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.util.Functional;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -21,17 +22,13 @@ import static java.lang.Integer.parseInt;
 
 public class Authenticator {
 
-    private PrincipalDetailSource principalDetailSource;
-    private Logger logger;
+    private static final Logger LOGGER = Logger.getLoggerFor(Authenticator.class);
 
-    public Authenticator(
-            PrincipalDetailSource principalDetailSource,
-            Logger logger
-
-    ) {
+    public Authenticator(PrincipalDetailSource principalDetailSource) {
         this.principalDetailSource = principalDetailSource;
-        this.logger = logger;
     }
+    private PrincipalDetailSource principalDetailSource;
+    public final String pluginId = Constants.PLUGIN_ID;
 
     public Optional<Principal> authenticate(final String username, final String password) {
         return Functional.flatMap(principalDetailSource.byUsername(username), new Function<PrincipalDetail, Optional<Principal>>() {
@@ -63,7 +60,7 @@ public class Authenticator {
                             Optional.<Principal>absent();
 
                 } catch (DecoderException | GeneralSecurityException e) {
-                    logger.warn("Failed to read principal entry.", e);
+                    LOGGER.warn("Failed to read principal entry.", e);
                     return Optional.absent();
                 }
             }

@@ -1,13 +1,12 @@
 package com.thoughtworks.go.strongauth;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
-import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
 import com.thoughtworks.go.strongauth.goAPI.GoAPIMessageBuilder;
 import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
@@ -15,9 +14,14 @@ import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
+import org.apache.commons.io.IOUtils;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 public class ComponentFactory {
@@ -28,7 +32,9 @@ public class ComponentFactory {
     private static final String CALL_FROM_SERVER_GET_VIEW = "go.plugin-settings.get-view";
     private static final String CALL_FROM_SERVER_VALIDATE_CONFIGURATION = "go.plugin-settings.validate-configuration";
 
+    private static final Logger LOGGER = Logger.getLoggerFor(ComponentFactory.class);
     public final String pluginId = Constants.PLUGIN_ID;
+
     private final GoApplicationAccessorSource goApplicationAccessor;
 
     private GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
@@ -44,10 +50,6 @@ public class ComponentFactory {
                 goUserAPI(),
                 redirectEncoder()
         );
-    }
-
-    private Logger logger() {
-        return Logger.getLoggerFor(ComponentFactory.class);
     }
 
     private RedirectResponseEncoder redirectEncoder() {
@@ -71,16 +73,23 @@ public class ComponentFactory {
     }
 
     private Authenticator authenticator() {
-        return new Authenticator(principalSource(), logger());
+        return new Authenticator(principalSource());
     }
 
     private PrincipalDetailSource principalSource() {
-        return new PrincipalDetailSource() {
-            @Override
-            public Optional<PrincipalDetail> byUsername(String username) {
-                throw new UnsupportedOperationException("NYI");
-            }
-        };
+        return new ConfigurableUserPrincipalDetailSource(principalSourceFile());
+    }
+
+    private InputStream principalSourceFile() {
+        //TODO: make this location configurable
+        String filePath = "/etc/go/passwd";
+        try {
+            return new FileInputStream(filePath);
+        } catch (FileNotFoundException e) {
+            LOGGER.error(format("Missing password file at %s. No credentials loaded.", filePath));
+        }
+
+        return IOUtils.toInputStream("");
     }
 
     private GoAuthenticationRequestDecoder requestDecoder() {
