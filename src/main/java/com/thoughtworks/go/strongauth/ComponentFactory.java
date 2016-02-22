@@ -12,11 +12,14 @@ import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
+import com.thoughtworks.go.strongauth.util.InputStreamSource;
+import com.thoughtworks.go.strongauth.util.io.FileChangeMonitor;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -81,19 +84,11 @@ public class ComponentFactory {
     }
 
     private PrincipalDetailSource principalSource() {
-        return new ConfigurableUserPrincipalDetailSource(principalSourceFile());
+        return new ConfigurableUserPrincipalDetailSource(new FileChangeMonitor(principalSourceFile()));
     }
 
-    private InputStream principalSourceFile() {
-        //TODO: make this location configurable
-        String filePath = "/etc/go/passwd";
-        try {
-            return new FileInputStream(filePath);
-        } catch (FileNotFoundException e) {
-            LOGGER.error(format("Missing password file at %s. No credentials loaded.", filePath));
-        }
-
-        return IOUtils.toInputStream("");
+    private File principalSourceFile() {
+        return new File("/etc/go/passwd");
     }
 
     private GoAuthenticationRequestDecoder requestDecoder() {

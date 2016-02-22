@@ -1,8 +1,11 @@
 package com.thoughtworks.go.strongauth.authentication.principalDetailSources;
 
 import com.google.common.base.Optional;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.util.Constants;
+import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -13,14 +16,26 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.toBufferedReader;
 
 public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSource {
     private final Map<String, PrincipalDetail> principalDetails = new HashMap<>();
     public static final Pattern DETAIL_PATTERN = Pattern.compile("^([^:]+):([^:]+):([^:]+):([^:]+)$");
 
-    @SneakyThrows(IOException.class)
-    public ConfigurableUserPrincipalDetailSource(InputStream passwordFile) {
+    private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
+    public final String pluginId = Constants.PLUGIN_ID;
+
+    public ConfigurableUserPrincipalDetailSource(InputStreamSource passwords)
+    {
+        try {
+            loadSource(passwords.inputStream());
+        } catch (IOException e) {
+            LOGGER.error("Missing password file. No credentials loaded.");
+        }
+    }
+
+    private void loadSource(InputStream passwordFile) throws IOException {
         String line;
         while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {
             Optional<PrincipalDetail> maybeDetail = parse(line);
@@ -30,8 +45,6 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
             }
         }
     }
-
-
 
     private Optional<PrincipalDetail> parse(final String line) {
         final Matcher matcher = DETAIL_PATTERN.matcher(line);
@@ -51,4 +64,5 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     public Optional<PrincipalDetail> byUsername(String username) {
         return Optional.fromNullable(principalDetails.get(username));
     }
+
 }

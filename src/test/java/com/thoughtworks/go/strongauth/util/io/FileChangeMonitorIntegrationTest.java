@@ -37,11 +37,11 @@ public class FileChangeMonitorIntegrationTest {
     @Test
     public void detectFileChange() throws Exception {
 
-        final Wrapper<FileChangeEvent> eventWrapper = new Wrapper<>();
+        final Wrapper<SourceChangeEvent> eventWrapper = new Wrapper<>();
         FileChangeMonitor fileChangeMonitor = new FileChangeMonitor(path);
-        fileChangeMonitor.addFileChangeListener(new FileChangeListener(){
+        fileChangeMonitor.addChangeListener(new SourceChangerListener(){
             @Override
-            public void fileChanged(final FileChangeEvent event) {
+            public void sourceChanged(final SourceChangeEvent event) {
                 eventWrapper.set(event);
             }
         });
@@ -53,7 +53,7 @@ public class FileChangeMonitorIntegrationTest {
                 return eventWrapper.isSet();
             }
         }, 20000);
-        assertThat(eventWrapper.get(), is(new FileChangeEvent(path)));
+        assertThat(eventWrapper.get(), is(new SourceChangeEvent(path)));
     }
 
     private static void waitUntil(Supplier<Boolean> supplier, long waitTimeInMillis) {
