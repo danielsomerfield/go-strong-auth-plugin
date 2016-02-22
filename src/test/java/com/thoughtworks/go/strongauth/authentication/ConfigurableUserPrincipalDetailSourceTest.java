@@ -3,6 +3,7 @@ package com.thoughtworks.go.strongauth.authentication;
 import com.google.common.base.Optional;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
+import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
 import com.thoughtworks.go.strongauth.util.io.SourceChangerListener;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;

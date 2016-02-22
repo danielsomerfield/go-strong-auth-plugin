@@ -53,7 +53,8 @@ public class FileChangeMonitorIntegrationTest {
                 return eventWrapper.isSet();
             }
         }, 20000);
-        assertThat(eventWrapper.get(), is(new SourceChangeEvent(path)));
+        String newContents = IOUtils.toString(eventWrapper.get().getInputStream());
+        assertThat(newContents, is("foo2"));
     }
 
     private static void waitUntil(Supplier<Boolean> supplier, long waitTimeInMillis) {

@@ -3,10 +3,7 @@ package com.thoughtworks.go.strongauth.util.io;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import lombok.SneakyThrows;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +41,7 @@ public class FileChangeMonitor implements InputStreamSource<File> {
                     }
                     for (WatchEvent evt : key.pollEvents()) {
                         if (evt.kind() == ENTRY_MODIFY) {
-                            notifyListeners(new SourceChangeEvent(new File(parentDir.toString(), evt.context().toString())));
+                            notifyListeners(new SourceChangeEvent(new FileInputStream(new File(parentDir.toString(), evt.context().toString()))));
                         }
                     }
                 }
@@ -60,7 +57,7 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     }
 
     @Override
-    public void addChangeListener(SourceChangerListener<File> sourceChangerListener) {
+    public void addChangeListener(SourceChangerListener sourceChangerListener) {
         synchronized (sourceChangerListeners) {
             if (!sourceChangerListeners.contains(sourceChangerListener)) {
                 sourceChangerListeners.add(sourceChangerListener);

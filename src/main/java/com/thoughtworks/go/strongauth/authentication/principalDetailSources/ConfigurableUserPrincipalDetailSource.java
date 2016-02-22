@@ -6,6 +6,8 @@ import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
+import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
+import com.thoughtworks.go.strongauth.util.io.SourceChangerListener;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -26,16 +28,27 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
     public final String pluginId = Constants.PLUGIN_ID;
 
-    public ConfigurableUserPrincipalDetailSource(InputStreamSource passwords)
+    public ConfigurableUserPrincipalDetailSource(InputStreamSource<?> passwords)
     {
         try {
             loadSource(passwords.inputStream());
+            passwords.addChangeListener(new SourceChangerListener() {
+                @Override
+                public void sourceChanged(SourceChangeEvent event) {
+                    try {
+                        loadSource(event.getInputStream());
+                    } catch (IOException e) {
+                        LOGGER.error("Missing password file. No credentials loaded.");
+                    }
+                }
+            });
         } catch (IOException e) {
             LOGGER.error("Missing password file. No credentials loaded.");
         }
     }
 
     private void loadSource(InputStream passwordFile) throws IOException {
+        principalDetails.clear();
         String line;
         while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {
             Optional<PrincipalDetail> maybeDetail = parse(line);

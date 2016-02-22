@@ -7,7 +7,7 @@ import java.io.InputStream;
 
 public interface InputStreamSource<T> {
 
-    void addChangeListener(SourceChangerListener<T> sourceChangerListener);
+    void addChangeListener(SourceChangerListener sourceChangerListener);
 
     InputStream inputStream() throws IOException;
 }
