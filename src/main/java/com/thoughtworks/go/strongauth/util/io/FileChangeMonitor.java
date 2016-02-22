@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
@@ -14,6 +16,7 @@ public class FileChangeMonitor {
 
     private boolean running = true;
     private final List<FileChangeListener> fileChangeListeners = new LinkedList<>();
+    private final static ExecutorService executorService = Executors.newCachedThreadPool();
 
     @SneakyThrows(IOException.class)
     public FileChangeMonitor(final File file) {
@@ -22,7 +25,7 @@ public class FileChangeMonitor {
         final WatchService watchService = FileSystems.getDefault().newWatchService();
         parentDir.register(watchService, ENTRY_MODIFY);
 
-        final Thread watcherThread = new Thread(new Runnable() {
+        executorService.submit(new Runnable() {
             @Override
             @SneakyThrows(IOException.class)
             public void run() {
@@ -45,8 +48,6 @@ public class FileChangeMonitor {
             }
         }, "Watcher thread");
 
-        watcherThread.setDaemon(true);
-        watcherThread.start();
     }
 
     public void stop() {
