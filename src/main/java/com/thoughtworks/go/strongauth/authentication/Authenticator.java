@@ -5,14 +5,13 @@ import com.google.common.base.Optional;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.util.Functional;
-import lombok.SneakyThrows;
 import lombok.Value;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -29,6 +28,7 @@ public class Authenticator {
     public Authenticator(PrincipalDetailSource principalDetailSource) {
         this.principalDetailSource = principalDetailSource;
     }
+
     private PrincipalDetailSource principalDetailSource;
 
     public Optional<Principal> authenticate(final String username, final String password) {
@@ -52,15 +52,14 @@ public class Authenticator {
         return Functional.flatMap(maybeHashConfig, new Function<HashConfig, Optional<Principal>>() {
 
             @Override
-            @SneakyThrows(UnsupportedEncodingException.class)
             public Optional<Principal> apply(HashConfig hashConfig) {
-                PBEKeySpec spec = new PBEKeySpec(
-                        password.toCharArray(),
-                        principalDetail.getSalt().getBytes("UTF-8"),
-                        hashConfig.getIterations(),
-                        hashConfig.getKeySize());
 
                 try {
+                    PBEKeySpec spec = new PBEKeySpec(
+                            password.toCharArray(),
+                            Base64.decodeBase64(principalDetail.getSalt()),
+                            hashConfig.getIterations(),
+                            hashConfig.getKeySize());
                     byte[] key = SecretKeyFactory.getInstance(hashConfig.getAlgorithm()).generateSecret(spec).getEncoded();
                     return Arrays.equals(Hex.decodeHex(principalDetail.getPasswordHash().toCharArray()), key) ?
                             Optional.of(new Principal(principalDetail.getUsername())) :

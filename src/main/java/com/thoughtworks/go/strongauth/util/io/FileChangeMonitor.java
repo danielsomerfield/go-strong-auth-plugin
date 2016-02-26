@@ -26,7 +26,7 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     private final File file;
 
     private int minDelay = 100;
-    private int maxDelay = 1000 * 5;
+    private int maxDelay = 100;
     private Function<Integer, Integer> incrementalChange = new Function<Integer, Integer>() {
         @Override
         public Integer apply(final Integer in) {
@@ -47,13 +47,15 @@ public class FileChangeMonitor implements InputStreamSource<File> {
             @Override
             public void run() {
                 final Optional<String> newMaybeHash = hash();
-
+                final int newDelay;
                 if (!newMaybeHash.equals(maybeHash)) {
                     notifyListeners(new SourceChangeEvent(contents(), file.getAbsolutePath()));
+                    newDelay = minDelay;
+                } else {
+                    newDelay = incrementalChange.apply(delay);
                 }
 
                 if (running) {
-                    final int newDelay = incrementalChange.apply(delay);
                     waitFor(newDelay);
                     checkForChange(newDelay, newMaybeHash);
                 }

@@ -100,6 +100,7 @@ public class StrongAuthGlue {
     public void aLoginExistsFor(String username, String password) throws Throwable {
         testHelpers.clearAuthFile();
         testHelpers.createPasswordEntryFor(username, password);
+        Thread.sleep(5000); //Can we find a better way?
     }
 
     @When("^I login$")
