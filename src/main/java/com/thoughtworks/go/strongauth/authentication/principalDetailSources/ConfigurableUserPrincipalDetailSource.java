@@ -48,6 +48,7 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     }
 
     private void loadSource(InputStream passwordFile) throws IOException {
+        LOGGER.info("loadSource()");
         principalDetails.clear();
         String line;
         while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {

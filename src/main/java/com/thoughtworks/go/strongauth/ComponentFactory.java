@@ -12,17 +12,12 @@ import com.thoughtworks.go.strongauth.goAPI.GoApplicationAccessorSource;
 import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.handlers.*;
 import com.thoughtworks.go.strongauth.util.Constants;
-import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import com.thoughtworks.go.strongauth.util.io.FileChangeMonitor;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
-import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.URI;
 
 import static java.lang.String.format;
@@ -40,19 +35,31 @@ public class ComponentFactory {
     public final String pluginId = Constants.PLUGIN_ID;
 
     private final GoApplicationAccessorSource goApplicationAccessor;
+    private final Handler CONFIGURATION_HANDLER = PluginSettingsHandler.getConfiguration();
+    private final Handler PLUGIN_SETTINGS_IEW_HANDLER = PluginSettingsHandler.getView();
+    private final Handler VALIDATE_CONFIGURATION_HANDLER = PluginSettingsHandler.validateConfiguration();
+    private final PluginConfigurationHandler PLUGIN_CONFIGURATION_HANDLER = new PluginConfigurationHandler();
+    private final AuthenticationHandler AUTHENTICATION_HANDLER = new AuthenticationHandler(
+            requestDecoder(),
+            authenticator(),
+            goUserEncoder()
+    );
+    private final Handlers HANDLERS = new Handlers(
+            ImmutableMap.of(
+                    CALL_FROM_SERVER_GET_CONFIGURATION, CONFIGURATION_HANDLER,
+                    CALL_FROM_SERVER_GET_VIEW, PLUGIN_SETTINGS_IEW_HANDLER,
+                    CALL_FROM_SERVER_VALIDATE_CONFIGURATION, VALIDATE_CONFIGURATION_HANDLER,
+                    CALL_FROM_SERVER_PLUGIN_CONFIGURATION, PLUGIN_CONFIGURATION_HANDLER,
+                    CALL_FROM_SERVER_AUTHENTICATE_USER, AUTHENTICATION_HANDLER
+//            CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler(),
+//            CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier)
+            )
+    );
 
     private GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
 
     public ComponentFactory(GoApplicationAccessorSource goApplicationAccessorSource) {
         this.goApplicationAccessor = goApplicationAccessorSource;
-    }
-
-    public Handler authenticationHandler() {
-        return new AuthenticationHandler(
-                requestDecoder(),
-                authenticator(),
-                goUserEncoder()
-        );
     }
 
     private GoUserEncoder goUserEncoder() {
@@ -100,16 +107,6 @@ public class ComponentFactory {
     }
 
     public Handlers handlers() {
-        return new Handlers(
-                ImmutableMap.of(
-                        CALL_FROM_SERVER_GET_CONFIGURATION, PluginSettingsHandler.getConfiguration(),
-                        CALL_FROM_SERVER_GET_VIEW, PluginSettingsHandler.getView(),
-                        CALL_FROM_SERVER_VALIDATE_CONFIGURATION, PluginSettingsHandler.validateConfiguration(),
-                        CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler(),
-                        CALL_FROM_SERVER_AUTHENTICATE_USER, authenticationHandler()
-//            CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler(),
-//            CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier)
-                )
-        );
+        return HANDLERS;
     }
 }

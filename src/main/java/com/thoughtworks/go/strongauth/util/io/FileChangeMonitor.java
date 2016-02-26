@@ -1,55 +1,87 @@
 package com.thoughtworks.go.strongauth.util.io;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.thoughtworks.go.plugin.api.logging.Logger;
+import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
-import lombok.SneakyThrows;
 
 import java.io.*;
-import java.nio.file.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.lang.String.format;
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
 public class FileChangeMonitor implements InputStreamSource<File> {
 
+    public final String pluginId = Constants.PLUGIN_ID;
+    private static final Logger LOGGER = Logger.getLoggerFor(FileChangeMonitor.class);
+
     private boolean running = true;
     private final List<SourceChangerListener> sourceChangerListeners = new LinkedList<>();
-    private final static ExecutorService executorService = Executors.newCachedThreadPool();
+    private final static ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final File file;
 
-    @SneakyThrows(IOException.class)
+    private int minDelay = 100;
+    private int maxDelay = 1000 * 5;
+    private Function<Integer, Integer> incrementalChange = new Function<Integer, Integer>() {
+        @Override
+        public Integer apply(final Integer in) {
+            if (in > maxDelay) {
+                return maxDelay;
+            }
+            return in * 2;
+        }
+    };
+
     public FileChangeMonitor(final File file) {
-
         this.file = file;
-        final Path parentDir = FileSystems.getDefault().getPath(file.getAbsolutePath()).getParent();
-        final WatchService watchService = FileSystems.getDefault().newWatchService();
-        parentDir.register(watchService, ENTRY_MODIFY);
+        checkForChange(minDelay, hash());
+    }
 
+    private void checkForChange(final int delay, final Optional<String> maybeHash) {
         executorService.submit(new Runnable() {
             @Override
-            @SneakyThrows(IOException.class)
             public void run() {
-                while (running) {
-                    final WatchKey key;
-                    try {
-                        key = watchService.take();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
-                    for (WatchEvent evt : key.pollEvents()) {
-                        if (evt.kind() == ENTRY_MODIFY) {
-                            notifyListeners(new SourceChangeEvent(new FileInputStream(new File(parentDir.toString(), evt.context().toString()))));
-                        }
-                    }
+                final Optional<String> newMaybeHash = hash();
+
+                if (!newMaybeHash.equals(maybeHash)) {
+                    notifyListeners(new SourceChangeEvent(contents(), file.getAbsolutePath()));
                 }
-                watchService.close();
 
+                if (running) {
+                    final int newDelay = incrementalChange.apply(delay);
+                    waitFor(newDelay);
+                    checkForChange(newDelay, newMaybeHash);
+                }
             }
-        }, "Watcher thread");
 
+            private InputStream contents() {
+                try {
+                    return new FileInputStream(file);
+                } catch (FileNotFoundException e) {
+                    return new ByteArrayInputStream(new byte[0]);
+                }
+            }
+        }, format("Watcher thread: %s", file.getAbsolutePath()));
+    }
+
+    private Optional<String> hash() {
+        try {
+            return Optional.of(md5Hex(new FileInputStream(file)));
+        } catch (IOException e) {
+            return Optional.absent();
+        }
+    }
+
+    private void waitFor(final int delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+        }
     }
 
     public void stop() {
@@ -65,16 +97,24 @@ public class FileChangeMonitor implements InputStreamSource<File> {
         }
     }
 
-    private void notifyListeners(SourceChangeEvent sourceChangeEvent) {
-        SourceChangerListener[] listeners;
+    private void notifyListeners(final SourceChangeEvent sourceChangeEvent) {
+        //Make this async
+        LOGGER.info("notifyListeners: " + sourceChangeEvent);
+        final SourceChangerListener[] listeners;
         synchronized (sourceChangerListeners) {
             listeners = new SourceChangerListener[sourceChangerListeners.size()];
             sourceChangerListeners.toArray(listeners);
         }
 
-        for (SourceChangerListener listener : listeners) {
-            listener.sourceChanged(sourceChangeEvent);
-        }
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                for (SourceChangerListener listener : listeners) {
+                    listener.sourceChanged(sourceChangeEvent);
+                }
+            }
+        });
+
     }
 
     @Override

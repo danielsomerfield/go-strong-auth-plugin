@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.*;
 
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -18,11 +19,11 @@ public class FileChangeMonitorIntegrationTest {
 
     @Before
     public void setup() throws IOException {
+        path = File.createTempFile("FileChangeMonitorTest", "tmp");
         setFileContents("foo");
     }
 
     private void setFileContents(final String contents) throws IOException {
-        path = File.createTempFile("FileChangeMonitorTest", "tmp");
         try (OutputStream out = new FileOutputStream(path)) {
             IOUtils.write(contents, out, "UTF-8");
         }
@@ -52,7 +53,7 @@ public class FileChangeMonitorIntegrationTest {
             public Boolean get() {
                 return eventWrapper.isSet();
             }
-        }, 20000);
+        }, 5000);
         String newContents = IOUtils.toString(eventWrapper.get().getInputStream());
         assertThat(newContents, is("foo2"));
     }

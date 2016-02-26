@@ -8,6 +8,6 @@ import java.io.InputStream;
 public class SourceChangeEvent {
 
     private InputStream inputStream;
-
+    private String description;
 
 }

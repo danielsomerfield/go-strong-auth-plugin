@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 #TODO: if the file exists but the container doesn't it should move on...
