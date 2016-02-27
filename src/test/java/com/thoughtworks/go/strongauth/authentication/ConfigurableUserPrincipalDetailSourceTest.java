@@ -3,8 +3,7 @@ package com.thoughtworks.go.strongauth.authentication;
 import com.google.common.base.Optional;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
-import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
-import com.thoughtworks.go.strongauth.util.io.SourceChangerListener;
+import com.thoughtworks.go.strongauth.util.io.SourceChangeListener;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -41,7 +40,7 @@ public class ConfigurableUserPrincipalDetailSourceTest {
         }
 
         @Override
-        public void addChangeListener(SourceChangerListener sourceChangerListener) {
+        public void addChangeListener(SourceChangeListener sourceChangeListener) {
 
         }
 

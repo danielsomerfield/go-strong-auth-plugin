@@ -40,7 +40,7 @@ public class FileChangeMonitorIntegrationTest {
 
         final Wrapper<SourceChangeEvent> eventWrapper = new Wrapper<>();
         FileChangeMonitor fileChangeMonitor = new FileChangeMonitor(path);
-        fileChangeMonitor.addChangeListener(new SourceChangerListener(){
+        fileChangeMonitor.addChangeListener(new SourceChangeListener(){
             @Override
             public void sourceChanged(final SourceChangeEvent event) {
                 eventWrapper.set(event);

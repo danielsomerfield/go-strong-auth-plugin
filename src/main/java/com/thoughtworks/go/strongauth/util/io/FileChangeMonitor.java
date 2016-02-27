@@ -21,8 +21,8 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     private static final Logger LOGGER = Logger.getLoggerFor(FileChangeMonitor.class);
 
     private boolean running = true;
-    private final List<SourceChangerListener> sourceChangerListeners = new LinkedList<>();
-    private final static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final List<SourceChangeListener> sourceChangeListeners = new LinkedList<>();
+    private final static ExecutorService executorService = Executors.newCachedThreadPool();
     private final File file;
 
     private int minDelay = 100;
@@ -91,27 +91,29 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     }
 
     @Override
-    public void addChangeListener(SourceChangerListener sourceChangerListener) {
-        synchronized (sourceChangerListeners) {
-            if (!sourceChangerListeners.contains(sourceChangerListener)) {
-                sourceChangerListeners.add(sourceChangerListener);
+    public void addChangeListener(SourceChangeListener sourceChangeListener) {
+        LOGGER.info("Adding listener " + sourceChangeListener);
+        synchronized (sourceChangeListeners) {
+            if (!sourceChangeListeners.contains(sourceChangeListener)) {
+                sourceChangeListeners.add(sourceChangeListener);
             }
         }
     }
 
     private void notifyListeners(final SourceChangeEvent sourceChangeEvent) {
         //Make this async
-        LOGGER.info("notifyListeners: " + sourceChangeEvent);
-        final SourceChangerListener[] listeners;
-        synchronized (sourceChangerListeners) {
-            listeners = new SourceChangerListener[sourceChangerListeners.size()];
-            sourceChangerListeners.toArray(listeners);
+        LOGGER.info("notifyListeners from : " + this + " event = " + sourceChangeEvent);
+        LOGGER.info("Listeners " + sourceChangeListeners);
+        final SourceChangeListener[] listeners;
+        synchronized (sourceChangeListeners) {
+            listeners = new SourceChangeListener[sourceChangeListeners.size()];
+            sourceChangeListeners.toArray(listeners);
         }
 
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                for (SourceChangerListener listener : listeners) {
+                for (SourceChangeListener listener : listeners) {
                     listener.sourceChanged(sourceChangeEvent);
                 }
             }

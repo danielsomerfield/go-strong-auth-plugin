@@ -1,7 +1,6 @@
 package com.thoughtworks.go.strongauth.glue;
 
 import com.thoughtworks.go.TestHelpers;
-import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -10,8 +9,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -30,6 +32,16 @@ public class StrongAuthGlue {
     private HttpResponse response;
     private TestHelpers testHelpers = new TestHelpers();
     private CookieStore cookieStore = new BasicCookieStore();
+    private CloseableHttpClient httpClient = HttpClientBuilder.create()
+            .setDefaultCookieStore(cookieStore)
+            .setRedirectStrategy(new DefaultRedirectStrategy() {
+                @Override
+                public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
+                    return false;
+                }
+            })
+            .setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build())
+            .build();
 
     @Given("^Go CD is running$")
     public void goCDIsRunning() throws Throwable {
@@ -71,12 +83,7 @@ public class StrongAuthGlue {
     }
 
     private CloseableHttpClient httpClient() {
-        return HttpClientBuilder.create().setDefaultCookieStore(cookieStore).setRedirectStrategy(new DefaultRedirectStrategy() {
-            @Override
-            public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
-                return false;
-            }
-        }).build();
+        return httpClient;
     }
 
     @Given("^Auth is enabled$")
@@ -105,7 +112,11 @@ public class StrongAuthGlue {
 
     @When("^I login$")
     public void iLogin() throws Throwable {
-        HttpPost post = new HttpPost(getURLForPath("go/auth/security_check"));
-        httpClient().execute(post);
+        HttpPost post = new HttpPost(getURLForPath("/go/auth/security_check"));
+        post.setHeader("Content-type", "application/x-www-form-urlencoded");
+        post.setEntity(new StringEntity("j_username=aUser&j_password=aSecret"));
+        final CloseableHttpResponse response = httpClient().execute(post);
+        assertThat(response.getStatusLine().getStatusCode(), is(302));
+        System.out.println(response.getFirstHeader("Location"));
     }
 }

@@ -1,13 +1,13 @@
 package com.thoughtworks.go.strongauth.util;
 
-import com.thoughtworks.go.strongauth.util.io.SourceChangerListener;
+import com.thoughtworks.go.strongauth.util.io.SourceChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public interface InputStreamSource<T> {
 
-    void addChangeListener(SourceChangerListener sourceChangerListener);
+    void addChangeListener(SourceChangeListener sourceChangeListener);
 
     InputStream inputStream() throws IOException;
 }

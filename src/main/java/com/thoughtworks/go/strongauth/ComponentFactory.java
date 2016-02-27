@@ -44,6 +44,7 @@ public class ComponentFactory {
             authenticator(),
             goUserEncoder()
     );
+
     private final Handlers HANDLERS = new Handlers(
             ImmutableMap.of(
                     CALL_FROM_SERVER_GET_CONFIGURATION, CONFIGURATION_HANDLER,

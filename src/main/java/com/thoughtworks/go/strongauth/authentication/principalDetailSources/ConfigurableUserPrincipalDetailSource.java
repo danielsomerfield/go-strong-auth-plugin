@@ -7,8 +7,7 @@ import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
 import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
-import com.thoughtworks.go.strongauth.util.io.SourceChangerListener;
-import lombok.SneakyThrows;
+import com.thoughtworks.go.strongauth.util.io.SourceChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +17,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.toBufferedReader;
 
 public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSource {
@@ -28,23 +26,24 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
     public final String pluginId = Constants.PLUGIN_ID;
 
-    public ConfigurableUserPrincipalDetailSource(InputStreamSource<?> passwords)
-    {
+    public ConfigurableUserPrincipalDetailSource(InputStreamSource<?> passwords) {
         try {
             loadSource(passwords.inputStream());
-            passwords.addChangeListener(new SourceChangerListener() {
-                @Override
-                public void sourceChanged(SourceChangeEvent event) {
-                    try {
-                        loadSource(event.getInputStream());
-                    } catch (IOException e) {
-                        LOGGER.error("Missing password file. No credentials loaded.");
-                    }
-                }
-            });
         } catch (IOException e) {
             LOGGER.error("Missing password file. No credentials loaded.");
         }
+
+        passwords.addChangeListener(new SourceChangeListener() {
+            @Override
+            public void sourceChanged(SourceChangeEvent event) {
+                LOGGER.info("sourceChanged");
+                try {
+                    loadSource(event.getInputStream());
+                } catch (IOException e) {
+                    LOGGER.error("Missing password file. No credentials loaded.");
+                }
+            }
+        });
     }
 
     private void loadSource(InputStream passwordFile) throws IOException {
@@ -53,6 +52,7 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
         String line;
         while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {
             Optional<PrincipalDetail> maybeDetail = parse(line);
+            LOGGER.info("Adding user: " + maybeDetail);
             if (maybeDetail.isPresent()) {
                 PrincipalDetail detail = maybeDetail.get();
                 principalDetails.put(detail.getUsername(), detail);
