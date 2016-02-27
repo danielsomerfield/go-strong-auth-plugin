@@ -26,7 +26,7 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     private final File file;
 
     private int minDelay = 100;
-    private int maxDelay = 100;
+    private int maxDelay = 2000;
     private Function<Integer, Integer> incrementalChange = new Function<Integer, Integer>() {
         @Override
         public Integer apply(final Integer in) {
