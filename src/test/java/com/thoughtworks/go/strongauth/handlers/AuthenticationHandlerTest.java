@@ -1,19 +1,13 @@
 package com.thoughtworks.go.strongauth.handlers;
 
 import com.google.common.base.Optional;
-import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.go.strongauth.authentication.AuthenticationRequest;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.Principal;
-import com.thoughtworks.go.strongauth.goAPI.GoUser;
-import com.thoughtworks.go.strongauth.goAPI.GoUserAPI;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
-import com.thoughtworks.go.strongauth.wire.AuthenticationResponseEncoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
-import com.thoughtworks.go.strongauth.wire.RedirectResponseEncoder;
-import lombok.Value;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +15,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AuthenticationHandlerTest {
 
@@ -44,7 +39,7 @@ public class AuthenticationHandlerTest {
         when(authenticator.authenticate(eq("username1"), anyString())).thenReturn(Optional.<Principal>absent());
         when(authenticator.authenticate("username1", "good-password")).thenReturn(Optional.of(new Principal("username1")));
         when(userEncoder.noUser()).thenReturn(loginFailedResponse);
-        when(userEncoder.encode(new GoUser("username1"))).thenReturn(loginSuccessResponse);
+        when(userEncoder.encode(("username1"))).thenReturn(loginSuccessResponse);
     }
 
     @Test

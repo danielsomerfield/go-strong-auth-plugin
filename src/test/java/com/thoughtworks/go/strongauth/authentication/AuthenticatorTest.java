@@ -1,6 +1,8 @@
 package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Optional;
+import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,13 +18,14 @@ public class AuthenticatorTest {
     private Authenticator authenticator = new Authenticator(principalDetailSource);
 
     @Before
+    @SneakyThrows
     public void setup() {
         when(principalDetailSource.byUsername(any(String.class))).thenReturn(Optional.<PrincipalDetail>absent());
         when(principalDetailSource.byUsername("username123")).thenReturn(
                 Optional.of(new PrincipalDetail(
                         "username123",
                         "21296e93b24064d688c934a6c22462cd5c74b927258c85e20eb1362921d15332",
-                        "salt",
+                        Base64.encodeBase64String("salt".getBytes("UTF-8")),
                         "PBKDF2WithHmacSHA1(10000, 256)"
                 )));
 
@@ -30,7 +33,7 @@ public class AuthenticatorTest {
                 Optional.of(new PrincipalDetail(
                         "username5Iterations",
                         "21296e93b24064d688c934a6c22462cd5c74b927258c85e20eb1362921d15332",
-                        "salt",
+                        Base64.encodeBase64String("salt".getBytes("UTF-8")),
                         "PBKDF2WithHmacSHA1(5, 256)"
                 )));
     }

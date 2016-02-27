@@ -41,7 +41,7 @@ public class Authenticator {
         });
 
         if (!maybePrincipal.isPresent()) {
-            LOGGER.info(format("Login attempt for user %s failed.", username));
+            LOGGER.warn(format("Login attempt for user %s failed.", username));
         }
         return maybePrincipal;
     }

@@ -25,6 +25,6 @@ public class StrongAuthPluginConfiguration {
                 });
             }
         }
-        return Optional.<File>absent();
+        return Optional.absent();
     }
 }

@@ -7,7 +7,6 @@ import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.go.strongauth.authentication.AuthenticationRequest;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.Principal;
-import com.thoughtworks.go.strongauth.goAPI.GoUser;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.util.Functional;
@@ -41,7 +40,7 @@ public class AuthenticationHandler implements Handler {
         });
 
         if (maybePrincipal.isPresent()) {
-            return userEncoder.encode(new GoUser(maybePrincipal.get().getId()));
+            return userEncoder.encode(maybePrincipal.get().getId());
         } else {
             return userEncoder.noUser();
         }

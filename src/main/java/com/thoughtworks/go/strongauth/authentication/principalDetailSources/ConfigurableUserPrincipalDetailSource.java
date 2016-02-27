@@ -30,13 +30,12 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
         try {
             loadSource(passwords.inputStream());
         } catch (IOException e) {
-            LOGGER.error("Missing password file. No credentials loaded.");
+            LOGGER.warn("Missing password file. No credentials loaded.");
         }
 
         passwords.addChangeListener(new SourceChangeListener() {
             @Override
             public void sourceChanged(SourceChangeEvent event) {
-                LOGGER.info("sourceChanged");
                 try {
                     loadSource(event.getInputStream());
                 } catch (IOException e) {
@@ -47,12 +46,10 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     }
 
     private void loadSource(InputStream passwordFile) throws IOException {
-        LOGGER.info("loadSource()");
         principalDetails.clear();
         String line;
         while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {
             Optional<PrincipalDetail> maybeDetail = parse(line);
-            LOGGER.info("Adding user: " + maybeDetail);
             if (maybeDetail.isPresent()) {
                 PrincipalDetail detail = maybeDetail.get();
                 principalDetails.put(detail.getUsername(), detail);

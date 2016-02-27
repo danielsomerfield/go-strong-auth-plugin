@@ -7,9 +7,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -40,7 +42,7 @@ public class FileChangeMonitorIntegrationTest {
 
         final Wrapper<SourceChangeEvent> eventWrapper = new Wrapper<>();
         FileChangeMonitor fileChangeMonitor = new FileChangeMonitor(path);
-        fileChangeMonitor.addChangeListener(new SourceChangeListener(){
+        fileChangeMonitor.addChangeListener(new SourceChangeListener() {
             @Override
             public void sourceChanged(final SourceChangeEvent event) {
                 eventWrapper.set(event);
@@ -63,7 +65,8 @@ public class FileChangeMonitorIntegrationTest {
         while (System.currentTimeMillis() < expireTime) {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
 
             if (supplier.get()) {
                 return;

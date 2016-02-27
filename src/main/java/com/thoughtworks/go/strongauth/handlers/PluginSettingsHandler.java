@@ -3,20 +3,16 @@ package com.thoughtworks.go.strongauth.handlers;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
-import static com.thoughtworks.go.strongauth.util.Constants.*;
-
-import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.util.MapBuilder;
-import com.thoughtworks.go.strongauth.util.Resources;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.thoughtworks.go.strongauth.util.Json.toJson;
 import static com.thoughtworks.go.strongauth.util.Json.toMap;
 import static com.thoughtworks.go.strongauth.util.MapBuilder.create;
 import static com.thoughtworks.go.strongauth.util.Resources.get;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 
 public class PluginSettingsHandler {
@@ -56,14 +52,7 @@ public class PluginSettingsHandler {
             @Override
             public GoPluginApiResponse call(GoPluginApiRequest request) {
                 Map<String, Map<String, String>> settings = (Map<String, Map<String, String>>) toMap(request.requestBody()).get("plugin-settings");
-                List<Map<Object, Object>> validationResponse = new ArrayList<Map<Object, Object>>();
-
-//                if (isEmpty(settings, SETTINGS_USERNAME_KEY))
-//                    addValidationError(validationResponse, SETTINGS_USERNAME_KEY, "Username");
-//                if (isEmpty(settings, SETTINGS_USER_DISPLAY_NAME_KEY))
-//                    addValidationError(validationResponse, SETTINGS_USER_DISPLAY_NAME_KEY, "Display name");
-//                if (isEmpty(settings, SETTINGS_USER_EMAIL_KEY))
-//                    addValidationError(validationResponse, SETTINGS_USER_EMAIL_KEY, "Email address");
+                List<Map<Object, Object>> validationResponse = new ArrayList<>();
 
                 return DefaultGoPluginApiResponse.success(toJson(validationResponse));
             }
