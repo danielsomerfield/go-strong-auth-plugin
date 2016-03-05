@@ -30,14 +30,16 @@ public class StrongAuthPlugin implements GoPlugin {
     public StrongAuthPlugin() {
         try {
             componentFactory = ComponentFactory.create();
+            this.handlers = componentFactory.handlers();
         } catch (Exception e) {
             LOGGER.error("Failed to create component factory", e);
+            throw e;
         }
     }
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        this.handlers = componentFactory.handlers();
+
     }
 
     @Override
@@ -48,10 +50,6 @@ public class StrongAuthPlugin implements GoPlugin {
     @Override
     public GoPluginApiResponse handle(GoPluginApiRequest request) throws UnhandledRequestTypeException {
         return handlers.get(request.requestName()).call(request);
-    }
-
-    public static void main(String[] args) {
-        new StrongAuthPlugin().initializeGoApplicationAccessor(null);
     }
 
 }

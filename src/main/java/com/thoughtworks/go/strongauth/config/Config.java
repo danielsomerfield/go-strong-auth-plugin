@@ -15,7 +15,6 @@ import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 import java.io.File;
 
@@ -23,18 +22,14 @@ import java.io.File;
 public class Config {
 
     @Bean
-    public Handlers handlers() {
+    Handlers handlers(AuthenticationHandler authenticationHandler) {
         return new Handlers(
                 ImmutableMap.of(
                         ComponentFactory.CALL_FROM_SERVER_GET_CONFIGURATION, PluginSettingsHandler.getConfiguration(),
                         ComponentFactory.CALL_FROM_SERVER_GET_VIEW, PluginSettingsHandler.getView(),
                         ComponentFactory.CALL_FROM_SERVER_VALIDATE_CONFIGURATION, PluginSettingsHandler.validateConfiguration(),
                         ComponentFactory.CALL_FROM_SERVER_PLUGIN_CONFIGURATION, new PluginConfigurationHandler(),
-                        ComponentFactory.CALL_FROM_SERVER_AUTHENTICATE_USER, new AuthenticationHandler(
-                                requestDecoder(),
-                                authenticator(),
-                                goUserEncoder()
-                        )
+                        ComponentFactory.CALL_FROM_SERVER_AUTHENTICATE_USER, authenticationHandler
 //            CALL_FROM_SERVER_SEARCH_USER, new SearchUserHandler(),
 //            CALL_FROM_SERVER_INDEX, new PluginIndexRequestHandler(accessorWrapper, goPluginIdentifier)
                 )
@@ -42,25 +37,27 @@ public class Config {
     }
 
     @Bean
-    @Autowired
-    public ComponentFactory componentFactory(Handlers handlers) {
+    AuthenticationHandler authenticationHandler(Authenticator authenticator) {
+        return new AuthenticationHandler(
+                new GoAuthenticationRequestDecoder(),
+                authenticator,
+                new GoUserEncoder()
+        );
+    }
+
+    @Bean
+    Authenticator authenticator(PrincipalDetailSource principalDetailSource) {
+        return new Authenticator(principalDetailSource);
+    }
+
+    @Bean
+    ComponentFactory componentFactory(Handlers handlers) {
         return new ComponentFactory(handlers);
     }
 
-    private GoAuthenticationRequestDecoder requestDecoder() {
-        return new GoAuthenticationRequestDecoder();
-    }
-
-    private Authenticator authenticator() {
-        return new Authenticator(principalSource());
-    }
-
-    private PrincipalDetailSource principalSource() {
+    @Bean
+    PrincipalDetailSource principalSource() {
         return new ConfigurableUserPrincipalDetailSource(new FileChangeMonitor(new File("/etc/go/passwd")));
-    }
-
-    private GoUserEncoder goUserEncoder() {
-        return new GoUserEncoder();
     }
 
 }
