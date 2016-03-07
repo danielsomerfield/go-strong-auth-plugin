@@ -7,11 +7,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class ComponentFactory {
 
-    public static final String CALL_FROM_SERVER_GET_CONFIGURATION = "go.plugin-settings.get-configuration";
-    public static final String CALL_FROM_SERVER_AUTHENTICATE_USER = "go.authentication.authenticate-user";
-    public static final String CALL_FROM_SERVER_PLUGIN_CONFIGURATION = "go.authentication.plugin-configuration";
-    public static final String CALL_FROM_SERVER_GET_VIEW = "go.plugin-settings.get-view";
-    public static final String CALL_FROM_SERVER_VALIDATE_CONFIGURATION = "go.plugin-settings.validate-configuration";
     private final Handlers handlers;
 
     @Autowired

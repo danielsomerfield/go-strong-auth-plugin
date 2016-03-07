@@ -82,7 +82,7 @@ public class FileChangeMonitor implements InputStreamSource<File> {
     private void waitFor(final int delay) {
         try {
             Thread.sleep(delay);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
         }
     }
 

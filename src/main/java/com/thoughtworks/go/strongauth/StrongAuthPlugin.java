@@ -10,10 +10,6 @@ import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.go.strongauth.handlers.Handlers;
 import com.thoughtworks.go.strongauth.util.Constants;
-import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import static java.util.Arrays.asList;
 
@@ -26,8 +22,15 @@ public class StrongAuthPlugin implements GoPlugin {
     private ComponentFactory componentFactory;
     private GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
     private Handlers handlers;
+    private GoApplicationAccessor goApplicationAccessor;
 
     public StrongAuthPlugin() {
+
+    }
+
+    @Override
+    public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
+        this.goApplicationAccessor = goApplicationAccessor;
         try {
             componentFactory = ComponentFactory.create();
             this.handlers = componentFactory.handlers();
@@ -35,11 +38,6 @@ public class StrongAuthPlugin implements GoPlugin {
             LOGGER.error("Failed to create component factory", e);
             throw e;
         }
-    }
-
-    @Override
-    public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-
     }
 
     @Override

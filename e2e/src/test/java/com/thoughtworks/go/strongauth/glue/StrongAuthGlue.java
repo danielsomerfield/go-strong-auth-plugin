@@ -117,6 +117,5 @@ public class StrongAuthGlue {
         post.setEntity(new StringEntity("j_username=aUser&j_password=aSecret"));
         final CloseableHttpResponse response = httpClient().execute(post);
         assertThat(response.getStatusLine().getStatusCode(), is(302));
-        System.out.println(response.getFirstHeader("Location"));
     }
 }
