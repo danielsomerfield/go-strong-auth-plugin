@@ -7,10 +7,10 @@ An authentication plugin for Go CD that supports configurable that supports good
 
 TODO
 ----
+- documentation
+- reload configuration when user changes path to pwd file
 - add configuration for how often to check file for reload, based on env variable
-- configuration UI
 - strong default algorithm, keysize, and iteration count, if not specified
-- User configuration support
 
 
 GO CD Core Recommendations

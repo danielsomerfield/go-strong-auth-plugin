@@ -65,12 +65,12 @@ public class Config {
     }
 
     @Bean
-    PrincipalDetailSource principalSource(final InputStreamSource<File> inputStreamSource) {
+    PrincipalDetailSource principalSource(final InputStreamSource inputStreamSource) {
         return new ConfigurableUserPrincipalDetailSource(inputStreamSource);
     }
 
     @Bean
-    InputStreamSource<File> inputStreamSource(final GoAPI goAPI) {
+    InputStreamSource inputStreamSource(final GoAPI goAPI) {
         return new FileChangeMonitor(goAPI.getPluginConfiguration().principalSourceFile());
     }
 

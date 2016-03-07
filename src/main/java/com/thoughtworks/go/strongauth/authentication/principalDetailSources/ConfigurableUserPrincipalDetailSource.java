@@ -26,7 +26,7 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
     public final String pluginId = Constants.PLUGIN_ID;
 
-    public ConfigurableUserPrincipalDetailSource(InputStreamSource<?> passwords) {
+    public ConfigurableUserPrincipalDetailSource(InputStreamSource passwords) {
         try {
             loadSource(passwords.inputStream());
         } catch (IOException e) {

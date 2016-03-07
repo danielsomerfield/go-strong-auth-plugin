@@ -5,7 +5,7 @@ import com.thoughtworks.go.strongauth.util.io.SourceChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface InputStreamSource<T> {
+public interface InputStreamSource {
 
     void addChangeListener(SourceChangeListener sourceChangeListener);
 
