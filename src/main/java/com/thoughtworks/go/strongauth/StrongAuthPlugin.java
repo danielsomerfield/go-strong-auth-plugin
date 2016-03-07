@@ -32,7 +32,7 @@ public class StrongAuthPlugin implements GoPlugin {
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
         this.goApplicationAccessor = goApplicationAccessor;
         try {
-            componentFactory = ComponentFactory.create();
+            componentFactory = ComponentFactory.create(goApplicationAccessor, goPluginIdentifier);
             this.handlers = componentFactory.handlers();
         } catch (Exception e) {
             LOGGER.error("Failed to create component factory", e);

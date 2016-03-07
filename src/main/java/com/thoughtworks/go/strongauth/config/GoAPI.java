@@ -15,35 +15,19 @@ import com.thoughtworks.go.strongauth.wire.PluginConfigurationDecoder;
 public class GoAPI {
     public final String pluginId = Constants.PLUGIN_ID;
     private static final Logger LOGGER = Logger.getLoggerFor(GoAPI.class);
+    private final GoPluginIdentifier goPluginIdentifier;
+    private final GoApplicationAccessor goApplicationAccessor;
 
-
-    public GoAPI() {
-
+    public GoAPI(GoPluginIdentifier goPluginIdentifier, GoApplicationAccessor goApplicationAccessor) {
+        this.goPluginIdentifier = goPluginIdentifier;
+        this.goApplicationAccessor = goApplicationAccessor;
     }
-
-    private PluginConfiguration pluginConfiguration = new PluginConfiguration("/etc/go/passwd");
 
     public PluginConfiguration getPluginConfiguration() {
-        return pluginConfiguration;
-    }
-
-    public Optional<PluginConfiguration> getPluginConfiguration2(
-            GoPluginIdentifier goPluginIdentifier,
-            GoApplicationAccessor goApplicationAccessor
-    ) {
         DefaultGoApiRequest request = new DefaultGoApiRequest("go.processor.plugin-settings.get", "1.0", goPluginIdentifier);
         request.setRequestBody(Json.toJson(ImmutableMap.of("plugin-id", Constants.PLUGIN_ID)));
         GoApiResponse response = goApplicationAccessor.submit(request);
-        Optional<PluginConfiguration> maybeConfiguration;
-        if (response.responseCode() == 200) {
-            maybeConfiguration = new PluginConfigurationDecoder().decode(response);
-        } else {
-            maybeConfiguration = Optional.absent();
-        }
-        LOGGER.info("-----------------------------------");
-        LOGGER.info("PluginConfiguration: " + maybeConfiguration);
-        LOGGER.info("-----------------------------------");
-        return maybeConfiguration;
+        return new PluginConfigurationDecoder().decode(response);
     }
 
 }

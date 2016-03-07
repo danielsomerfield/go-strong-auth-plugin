@@ -16,29 +16,29 @@ public class PluginConfigurationDecoderTest {
     public void testValidConfiguration() {
         DefaultGoApiResponse response = new DefaultGoApiResponse(200);
         response.setResponseBody(Json.toJson(ImmutableMap.of("PASSWORD_FILE_PATH", "/foo/bar")));
-        Optional<PluginConfiguration> configuration = new PluginConfigurationDecoder().decode(response);
-        assertThat(configuration, is(Optional.of(new PluginConfiguration("/foo/bar"))));
+        PluginConfiguration configuration = new PluginConfigurationDecoder().decode(response);
+        assertThat(configuration, is(new PluginConfiguration("/foo/bar")));
     }
 
     @Test
     public void testHandleNon200() {
         DefaultGoApiResponse response = new DefaultGoApiResponse(500);
-        Optional<PluginConfiguration> configuration = new PluginConfigurationDecoder().decode(response);
-        assertThat(configuration, is(Optional.<PluginConfiguration>absent()));
+        PluginConfiguration configuration = new PluginConfigurationDecoder().decode(response);
+        assertThat(configuration, is(new PluginConfiguration("/etc/go/passwd")));
     }
 
     @Test
     public void testNotConfigured() {
         DefaultGoApiResponse response = new DefaultGoApiResponse(200);
-        Optional<PluginConfiguration> configuration = new PluginConfigurationDecoder().decode(response);
-        assertThat(configuration, is(Optional.of(new PluginConfiguration("/etc/go/passwd"))));
+        PluginConfiguration configuration = new PluginConfigurationDecoder().decode(response);
+        assertThat(configuration, is(new PluginConfiguration("/etc/go/passwd")));
     }
 
     @Test
     public void testNotConfiguredWithPath() {
         DefaultGoApiResponse response = new DefaultGoApiResponse(200);
         response.setResponseBody(Json.toJson(ImmutableMap.of()));
-        Optional<PluginConfiguration> configuration = new PluginConfigurationDecoder().decode(response);
-        assertThat(configuration, is(Optional.of(new PluginConfiguration("/etc/go/passwd"))));
+        PluginConfiguration configuration = new PluginConfigurationDecoder().decode(response);
+        assertThat(configuration, is(new PluginConfiguration("/etc/go/passwd")));
     }
 }

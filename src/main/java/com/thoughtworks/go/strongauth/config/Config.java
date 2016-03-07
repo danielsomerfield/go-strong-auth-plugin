@@ -1,6 +1,8 @@
 package com.thoughtworks.go.strongauth.config;
 
 import com.google.common.collect.ImmutableMap;
+import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
+import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.strongauth.ComponentFactory;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
@@ -71,9 +73,10 @@ public class Config {
         return new FileChangeMonitor(goAPI.getPluginConfiguration().principalSourceFile());
     }
 
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Bean
-    GoAPI goAPI() {
-        return new GoAPI();
+    GoAPI goAPI(GoPluginIdentifier goPluginIdentifier, GoApplicationAccessor goApplicationAccessor) {
+        return new GoAPI(goPluginIdentifier, goApplicationAccessor);
     }
 
 }

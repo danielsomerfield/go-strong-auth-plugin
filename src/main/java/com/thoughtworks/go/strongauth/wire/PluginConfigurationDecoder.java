@@ -1,6 +1,5 @@
 package com.thoughtworks.go.strongauth.wire;
 
-import com.google.common.base.Optional;
 import com.thoughtworks.go.plugin.api.response.GoApiResponse;
 import com.thoughtworks.go.strongauth.config.PluginConfiguration;
 import com.thoughtworks.go.strongauth.util.Json;
@@ -8,25 +7,27 @@ import com.thoughtworks.go.strongauth.util.Json;
 import java.util.Map;
 
 public class PluginConfigurationDecoder {
-    public Optional<PluginConfiguration> decode(GoApiResponse response) {
-        Optional<PluginConfiguration> maybeConfiguration;
+    public PluginConfiguration decode(GoApiResponse response) {
         if (response.responseCode() == 200) {
-            maybeConfiguration = parseConfiguration(response.responseBody());
+            return parseConfiguration(response.responseBody());
         } else {
-            maybeConfiguration = Optional.absent();
+            return defaultConfiguration();
         }
-        return maybeConfiguration;
     }
 
-    private Optional<PluginConfiguration> parseConfiguration(String body) {
+    private PluginConfiguration parseConfiguration(String body) {
         if (body == null) {
-            return Optional.of(new PluginConfiguration());
+            return defaultConfiguration();
         } else {
-            return Optional.of(fromMap(Json.toMapOfStrings(body)));
+            return fromMap(Json.toMapOfStrings(body));
         }
     }
 
     private PluginConfiguration fromMap(Map<String, String> configMap) {
         return new PluginConfiguration(configMap.get("PASSWORD_FILE_PATH"));
+    }
+
+    public PluginConfiguration defaultConfiguration() {
+        return new PluginConfiguration();
     }
 }
