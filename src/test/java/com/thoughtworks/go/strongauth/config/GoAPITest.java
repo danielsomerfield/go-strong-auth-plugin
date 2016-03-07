@@ -5,6 +5,7 @@ import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.plugin.api.request.GoApiRequest;
 import com.thoughtworks.go.plugin.api.response.DefaultGoApiResponse;
+import com.thoughtworks.go.strongauth.wire.PluginConfigurationDecoder;
 import org.hamcrest.CustomMatcher;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import static org.skyscreamer.jsonassert.JSONCompare.compareJSON;
 public class GoAPITest {
     final GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", singletonList("1.0"));
     final GoApplicationAccessor goApplicationAccessor = mock(GoApplicationAccessor.class);
+    final PluginConfigurationDecoder pluginConfigurationDecoder = new PluginConfigurationDecoder();
 
     @Test
     public void testRequestPluginSettingsForStrongAuth() {
@@ -33,7 +35,7 @@ public class GoAPITest {
         when(goApplicationAccessor.submit(requestWithJSON(new JSONObject().put("plugin-id", "strongauth"))))
                 .thenReturn(response);
 
-        GoAPI goAPI = new GoAPI(goPluginIdentifier, goApplicationAccessor);
+        GoAPI goAPI = new GoAPI(goPluginIdentifier, goApplicationAccessor, pluginConfigurationDecoder);
 
         PluginConfiguration maybeConfiguration = goAPI.getPluginConfiguration();
         assertThat(maybeConfiguration.getPrincipalSourceFile(), is(new File("/path/to/thing")));
@@ -45,7 +47,7 @@ public class GoAPITest {
         when(goApplicationAccessor.submit(requestWithJSON(new JSONObject().put("plugin-id", "strongauth"))))
                 .thenReturn(badResponse);
 
-        GoAPI goAPI = new GoAPI(goPluginIdentifier, goApplicationAccessor);
+        GoAPI goAPI = new GoAPI(goPluginIdentifier, goApplicationAccessor, pluginConfigurationDecoder);
 
         PluginConfiguration maybeConfiguration = goAPI.getPluginConfiguration();
         assertThat(maybeConfiguration.getPrincipalSourceFile(), is(new File("/etc/go/passwd")));

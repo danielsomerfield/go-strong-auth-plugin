@@ -22,7 +22,6 @@ public class StrongAuthPlugin implements GoPlugin {
     private ComponentFactory componentFactory;
     private GoPluginIdentifier goPluginIdentifier = new GoPluginIdentifier("authentication", asList("1.0"));
     private Handlers handlers;
-    private GoApplicationAccessor goApplicationAccessor;
 
     public StrongAuthPlugin() {
 
@@ -30,7 +29,6 @@ public class StrongAuthPlugin implements GoPlugin {
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        this.goApplicationAccessor = goApplicationAccessor;
         try {
             componentFactory = ComponentFactory.create(goApplicationAccessor, goPluginIdentifier);
             this.handlers = componentFactory.handlers();

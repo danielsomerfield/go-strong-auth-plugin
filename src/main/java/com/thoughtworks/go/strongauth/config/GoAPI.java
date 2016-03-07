@@ -1,6 +1,5 @@
 package com.thoughtworks.go.strongauth.config;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
@@ -17,17 +16,23 @@ public class GoAPI {
     private static final Logger LOGGER = Logger.getLoggerFor(GoAPI.class);
     private final GoPluginIdentifier goPluginIdentifier;
     private final GoApplicationAccessor goApplicationAccessor;
+    private final PluginConfigurationDecoder pluginConfigurationDecoder;
 
-    public GoAPI(GoPluginIdentifier goPluginIdentifier, GoApplicationAccessor goApplicationAccessor) {
+    public GoAPI(
+            GoPluginIdentifier goPluginIdentifier,
+            GoApplicationAccessor goApplicationAccessor,
+            PluginConfigurationDecoder pluginConfigurationDecoder
+    ) {
         this.goPluginIdentifier = goPluginIdentifier;
         this.goApplicationAccessor = goApplicationAccessor;
+        this.pluginConfigurationDecoder = pluginConfigurationDecoder;
     }
 
     public PluginConfiguration getPluginConfiguration() {
         DefaultGoApiRequest request = new DefaultGoApiRequest("go.processor.plugin-settings.get", "1.0", goPluginIdentifier);
         request.setRequestBody(Json.toJson(ImmutableMap.of("plugin-id", Constants.PLUGIN_ID)));
         GoApiResponse response = goApplicationAccessor.submit(request);
-        return new PluginConfigurationDecoder().decode(response);
+        return pluginConfigurationDecoder.decode(response);
     }
 
 }

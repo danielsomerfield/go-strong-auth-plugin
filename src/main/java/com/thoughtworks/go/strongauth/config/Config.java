@@ -15,6 +15,7 @@ import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import com.thoughtworks.go.strongauth.util.io.FileChangeMonitor;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
+import com.thoughtworks.go.strongauth.wire.PluginConfigurationDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -64,7 +65,7 @@ public class Config {
     }
 
     @Bean
-    PrincipalDetailSource principalSource(InputStreamSource<File> inputStreamSource) {
+    PrincipalDetailSource principalSource(final InputStreamSource<File> inputStreamSource) {
         return new ConfigurableUserPrincipalDetailSource(inputStreamSource);
     }
 
@@ -73,10 +74,19 @@ public class Config {
         return new FileChangeMonitor(goAPI.getPluginConfiguration().principalSourceFile());
     }
 
-    @SuppressWarnings("SpringJavaAutowiringInspection")
+
     @Bean
-    GoAPI goAPI(GoPluginIdentifier goPluginIdentifier, GoApplicationAccessor goApplicationAccessor) {
-        return new GoAPI(goPluginIdentifier, goApplicationAccessor);
+    GoAPI goAPI(@SuppressWarnings("SpringJavaAutowiringInspection") final GoPluginIdentifier goPluginIdentifier,
+                @SuppressWarnings("SpringJavaAutowiringInspection") final GoApplicationAccessor goApplicationAccessor,
+                final PluginConfigurationDecoder pluginConfigurationDecoder
+
+    ) {
+        return new GoAPI(goPluginIdentifier, goApplicationAccessor, pluginConfigurationDecoder);
+    }
+
+    @Bean
+    PluginConfigurationDecoder pluginConfigurationDecoder() {
+        return new PluginConfigurationDecoder();
     }
 
 }
