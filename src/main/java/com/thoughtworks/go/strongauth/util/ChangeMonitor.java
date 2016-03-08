@@ -2,27 +2,39 @@ package com.thoughtworks.go.strongauth.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-public class ChangeMonitor<EVT_TYPE> {
+public class ChangeMonitor<EVT_TYPE, VALUE_TYPE> {
 
     private static final long MIN_DELAY = 100;
     private static final long MAX_DELAY = 2000;
 
     private boolean running = true;
-    private FileChangeDelegate<EVT_TYPE> delegate;
-    private final List<MonitorListener> changeListeners = new LinkedList<>();
-    private final static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+    private ChangeMonitorDelegate<? extends EVT_TYPE, VALUE_TYPE> delegate;
+    private final List<MonitorListener<EVT_TYPE>> changeListeners = new LinkedList<>();
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
 
+    private static final Logger LOGGER = Logger.getLoggerFor(ChangeMonitor.class);
+    public final String pluginId = Constants.PLUGIN_ID;
 
-    public ChangeMonitor(FileChangeDelegate<EVT_TYPE> delegate) {
+    public ChangeMonitor(ChangeMonitorDelegate<? extends EVT_TYPE, VALUE_TYPE> delegate) {
         this.delegate = delegate;
         checkForChange(MIN_DELAY, delegate.newValue());
+    }
+
+    public ChangeMonitor(
+            ChangeMonitorDelegate<? extends EVT_TYPE, VALUE_TYPE> delegate,
+            List<? extends MonitorListener<EVT_TYPE>> sourceChangeListeners
+    ) {
+        this(delegate);
+        synchronized (changeListeners) {
+            changeListeners.addAll(sourceChangeListeners);
+        }
     }
 
     private Function<Long, Long> incrementalChange = new Function<Long, Long>() {
@@ -35,44 +47,52 @@ public class ChangeMonitor<EVT_TYPE> {
         }
     };
 
-    private void checkForChange(final long delay, final Optional<?> oldMaybeValue) {
+    private void checkForChange(final long delay, final Optional<VALUE_TYPE> oldMaybeValue) {
         executorService.schedule(new Runnable() {
             @Override
             public void run() {
-                final Optional<?> newMaybeValue = delegate.newValue();
-                final long newDelay;
-                if (delegate.valueChanged(newMaybeValue, oldMaybeValue)) {
-                    final EVT_TYPE notifyEvent = delegate.createNotifyEvent(newMaybeValue, oldMaybeValue);
-                    notifyListeners(notifyEvent);
-                    newDelay = MIN_DELAY;
-                } else {
-                    newDelay = incrementalChange.apply(delay);
-                }
+                try {
+                    final Optional<VALUE_TYPE> newMaybeValue = delegate.newValue();
+                    final long newDelay;
+                    if (valueChanged(newMaybeValue, oldMaybeValue)) {
+                        final EVT_TYPE notifyEvent = delegate.createNotifyEvent(newMaybeValue, oldMaybeValue);
+                        notifyListeners(notifyEvent);
+                        newDelay = MIN_DELAY;
+                    } else {
+                        newDelay = incrementalChange.apply(delay);
+                    }
 
-                if (running) {
-                    checkForChange(newDelay, newMaybeValue);
+                    if (running) {
+                        checkForChange(newDelay, newMaybeValue);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("ChangeMonitor failed.", e);
                 }
             }
 
         }, delay, TimeUnit.MILLISECONDS);
+
+    }
+
+    public boolean valueChanged(Optional<?> newValue, Optional<?> oldValue) {
+        return !oldValue.equals(newValue);
     }
 
     public void stop() {
         running = false;
     }
 
-    private void notifyListeners(final EVT_TYPE sourceChangeEvent) {
-        final MonitorListener[] listeners;
+    private void notifyListeners(final EVT_TYPE event) {
+        final List<MonitorListener<EVT_TYPE>> listeners;
         synchronized (changeListeners) {
-            listeners = new MonitorListener[changeListeners.size()];
-            changeListeners.toArray(listeners);
+            listeners = new ArrayList<>(changeListeners);
         }
 
         executorService.submit(new Runnable() {
             @Override
             public void run() {
                 for (MonitorListener<EVT_TYPE> listener : listeners) {
-                    listener.changed(sourceChangeEvent);
+                    listener.changed(event);
                 }
             }
         });
@@ -86,12 +106,10 @@ public class ChangeMonitor<EVT_TYPE> {
         }
     }
 
-    public interface FileChangeDelegate<EVENT_TYPE> {
-        EVENT_TYPE createNotifyEvent(Optional<?> newMaybeValue, Optional<?> oldMaybeValue);
+    public interface ChangeMonitorDelegate<EVENT_TYPE, VALUE_TYPE> {
+        EVENT_TYPE createNotifyEvent(Optional<VALUE_TYPE> newMaybeValue, Optional<VALUE_TYPE> oldMaybeValue);
 
-        boolean valueChanged(Optional<?> newMaybeHash, Optional<?> maybeHash);
-
-        Optional<?> newValue();
+        Optional<VALUE_TYPE> newValue();
     }
 
     public interface MonitorListener<T> {

@@ -1,32 +1,28 @@
 package com.thoughtworks.go.strongauth.util.io;
 
 import com.google.common.base.Optional;
-import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.util.ChangeMonitor;
-import com.thoughtworks.go.strongauth.util.ChangeMonitor.FileChangeDelegate;
+import com.thoughtworks.go.strongauth.util.ChangeMonitor.ChangeMonitorDelegate;
 import com.thoughtworks.go.strongauth.util.ChangeMonitor.MonitorListener;
-import com.thoughtworks.go.strongauth.util.Constants;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
 
 import java.io.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import static java.lang.String.format;
 import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
-public class FileChangeMonitor implements InputStreamSource, FileChangeDelegate<SourceChangeEvent> {
+public class FileChangeMonitor implements InputStreamSource, ChangeMonitorDelegate<SourceChangeEvent, String> {
 
     private final File file;
 
-    private ChangeMonitor<SourceChangeEvent> changeMonitor;
+    private ChangeMonitor<SourceChangeEvent, String> changeMonitor;
 
     public FileChangeMonitor(final File file) {
         this.file = file;
         this.changeMonitor = new ChangeMonitor<>(this);
     }
 
-    public SourceChangeEvent createNotifyEvent(Optional<?> newMaybeValue, Optional<?> oldMaybeValue) {
+    public SourceChangeEvent createNotifyEvent(Optional<String> newMaybeValue, Optional<String> oldMaybeValue) {
         return new SourceChangeEvent(contents(), file.getAbsolutePath());
     }
 
@@ -38,11 +34,7 @@ public class FileChangeMonitor implements InputStreamSource, FileChangeDelegate<
         }
     }
 
-    public boolean valueChanged(Optional<?> newMaybeHash, Optional<?> maybeHash) {
-        return !newMaybeHash.equals(maybeHash);
-    }
-
-    public Optional<?> newValue() {
+    public Optional<String> newValue() {
         try {
             return Optional.of(md5Hex(new FileInputStream(file)));
         } catch (IOException e) {

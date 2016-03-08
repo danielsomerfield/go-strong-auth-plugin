@@ -19,8 +19,6 @@ import com.thoughtworks.go.strongauth.wire.PluginConfigurationDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-
 @Configuration
 public class Config {
 

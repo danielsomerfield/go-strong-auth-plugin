@@ -1,86 +1,31 @@
 package com.thoughtworks.go.strongauth.config;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
+import com.thoughtworks.go.strongauth.util.ChangeMonitor;
+import com.thoughtworks.go.strongauth.util.ChangeMonitor.ChangeMonitorDelegate;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
-public class ConfigurationMonitor {
+public class ConfigurationMonitor implements ChangeMonitorDelegate<ConfigurationChangedEvent, PluginConfiguration> {
 
     private final GoAPI goAPI;
-    private final List<? extends ConfigurationChangeListener> configurationChangeListeners;
-    private final Executor executorService;
-    private boolean running = true;
-
-    private static final int MIN_DELAY = 100;
-    private static final int MAX_DELAY = 2000;
-    private Function<Integer, Integer> incrementalChange = new Function<Integer, Integer>() {
-        @Override
-        public Integer apply(final Integer in) {
-            if (in > MAX_DELAY) {
-                return MAX_DELAY;
-            }
-            return in * 2;
-        }
-    };
+    private ChangeMonitor<ConfigurationChangedEvent, PluginConfiguration> changeMonitor;
 
     public ConfigurationMonitor(
             final GoAPI goAPI,
-            final List<? extends ConfigurationChangeListener> configurationChangeListeners,
-            final Executor executorService
+            final List<? extends ConfigurationChangeListener> configurationChangeListeners
     ) {
         this.goAPI = goAPI;
-        this.configurationChangeListeners = configurationChangeListeners;
-        this.executorService = executorService;
+        this.changeMonitor = new ChangeMonitor<>(this, configurationChangeListeners);
     }
 
-    void check() {
-//        final int newDelay;
-//
-//        final PluginConfiguration newConfiguration = goAPI.getPluginConfiguration();
-//        if (!newConfiguration.equals(currentConfiguration)) {
-//            notifyListeners(newConfiguration);
-//            newDelay = MIN_DELAY;
-//        }
-//
-//        final int newDelay;
-//        if (!newMaybeHash.equals(maybeHash)) {
-//            notifyListeners(new SourceChangeEvent(contents(), file.getAbsolutePath()));
-//
-//        } else {
-//            newDelay = incrementalChange.apply(delay);
-//        }
-//
-//        if (running) {
-//            waitFor(newDelay);
-//            check(newConfiguration);
-//        }
+    @Override
+    public ConfigurationChangedEvent createNotifyEvent(Optional<PluginConfiguration> newMaybeValue, Optional<PluginConfiguration> oldMaybeValue) {
+        return new ConfigurationChangedEvent(newMaybeValue);
     }
 
-    private void waitFor(final int delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
-    private void notifyListeners(final PluginConfiguration pluginConfiguration) {
-        final ConfigurationChangeListener[] listeners;
-        synchronized (configurationChangeListeners) {
-            listeners = new ConfigurationChangeListener[configurationChangeListeners.size()];
-            configurationChangeListeners.toArray(listeners);
-        }
-
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                final ConfigurationChangedEvent event = new ConfigurationChangedEvent(pluginConfiguration);
-                for (ConfigurationChangeListener listener : listeners) {
-                    listener.configurationChanged(event);
-                }
-            }
-        });
+    @Override
+    public Optional<PluginConfiguration> newValue() {
+        return Optional.of(goAPI.getPluginConfiguration());
     }
 }

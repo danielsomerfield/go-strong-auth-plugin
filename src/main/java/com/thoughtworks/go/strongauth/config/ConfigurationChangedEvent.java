@@ -1,8 +1,9 @@
 package com.thoughtworks.go.strongauth.config;
 
+import com.google.common.base.Optional;
 import lombok.Value;
 
 @Value
 public class ConfigurationChangedEvent {
-    private final PluginConfiguration pluginConfiguration;
+    private final Optional<PluginConfiguration> maybePluginConfiguration;
 }

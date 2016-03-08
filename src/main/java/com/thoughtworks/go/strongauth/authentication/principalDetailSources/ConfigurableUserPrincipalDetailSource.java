@@ -26,14 +26,14 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
     public final String pluginId = Constants.PLUGIN_ID;
 
-    public ConfigurableUserPrincipalDetailSource(InputStreamSource passwords) {
+    public ConfigurableUserPrincipalDetailSource(InputStreamSource passwordSource) {
         try {
-            loadSource(passwords.inputStream());
+            loadSource(passwordSource.inputStream());
         } catch (IOException e) {
             LOGGER.warn("Missing password file. No credentials loaded.");
         }
 
-        passwords.addChangeListener(new SourceChangeListener() {
+        passwordSource.addChangeListener(new SourceChangeListener() {
             @Override
             public void sourceChanged(SourceChangeEvent event) {
                 try {

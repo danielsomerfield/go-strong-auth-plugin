@@ -1,5 +1,5 @@
 package com.thoughtworks.go.strongauth.config;
 
-public interface ConfigurationChangeListener {
-    void configurationChanged(ConfigurationChangedEvent event);
-}
+import com.thoughtworks.go.strongauth.util.ChangeMonitor.MonitorListener;
+
+public interface ConfigurationChangeListener extends MonitorListener<ConfigurationChangedEvent> {}
