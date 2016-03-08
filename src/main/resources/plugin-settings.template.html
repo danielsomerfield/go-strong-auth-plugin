@@ -1,5 +1,5 @@
 <div class="form_item_block">
-    <label>Password file location:</label>
+    <label>Password file location (defaults to /etc/go/passwd):</label>
     <input type="text" ng-model="PASSWORD_FILE_PATH" ng-required="true" tabindex="0" />
     <span class="form_error" ng-show="GOINPUTNAME[PASSWORD_FILE_PATH].$error.server">{{ GOINPUTNAME[PASSWORD_FILE_PATH].$error.server }}</span>
 </div>
