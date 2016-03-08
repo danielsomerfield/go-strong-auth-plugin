@@ -24,17 +24,10 @@ public class ChangeMonitor<EVT_TYPE, VALUE_TYPE> {
 
     public ChangeMonitor(ChangeMonitorDelegate<? extends EVT_TYPE, VALUE_TYPE> delegate) {
         this.delegate = delegate;
-        checkForChange(MIN_DELAY, delegate.newValue());
     }
 
-    public ChangeMonitor(
-            ChangeMonitorDelegate<? extends EVT_TYPE, VALUE_TYPE> delegate,
-            List<? extends MonitorListener<EVT_TYPE>> sourceChangeListeners
-    ) {
-        this(delegate);
-        synchronized (changeListeners) {
-            changeListeners.addAll(sourceChangeListeners);
-        }
+    public void start() {
+        checkForChange(MIN_DELAY, Optional.<VALUE_TYPE>absent());
     }
 
     private Function<Long, Long> incrementalChange = new Function<Long, Long>() {
@@ -55,6 +48,8 @@ public class ChangeMonitor<EVT_TYPE, VALUE_TYPE> {
                     final Optional<VALUE_TYPE> newMaybeValue = delegate.newValue();
                     final long newDelay;
                     if (valueChanged(newMaybeValue, oldMaybeValue)) {
+                        LOGGER.info(String.format("Value changed from %s to %s", oldMaybeValue, newMaybeValue));
+                        LOGGER.info(String.format("Instance: %s", this));
                         final EVT_TYPE notifyEvent = delegate.createNotifyEvent(newMaybeValue, oldMaybeValue);
                         notifyListeners(notifyEvent);
                         newDelay = MIN_DELAY;
@@ -74,11 +69,14 @@ public class ChangeMonitor<EVT_TYPE, VALUE_TYPE> {
 
     }
 
-    public boolean valueChanged(Optional<?> newValue, Optional<?> oldValue) {
+    private boolean valueChanged(Optional<?> newValue, Optional<?> oldValue) {
         return !oldValue.equals(newValue);
     }
 
     public void stop() {
+        synchronized (changeListeners) {
+            changeListeners.clear();
+        }
         running = false;
     }
 

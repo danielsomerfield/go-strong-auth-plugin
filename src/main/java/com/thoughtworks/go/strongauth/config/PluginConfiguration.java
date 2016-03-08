@@ -20,10 +20,6 @@ public class PluginConfiguration {
                 new File(DEFAULT_SOURCE_FILE_PATH);
     }
 
-    public File principalSourceFile() {
-        return principalSourceFile;
-    }
-
     @Override
     public String toString() {
         return "PluginConfiguration{" +

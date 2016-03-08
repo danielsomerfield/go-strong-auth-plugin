@@ -5,5 +5,5 @@ import lombok.Value;
 
 @Value
 public class ConfigurationChangedEvent {
-    private final Optional<PluginConfiguration> maybePluginConfiguration;
+    private final Optional<PluginConfiguration> pluginConfiguration;
 }

@@ -42,6 +42,10 @@ public class FileChangeMonitor implements InputStreamSource, ChangeMonitorDelega
         }
     }
 
+    public void start() {
+        this.changeMonitor.start();
+    }
+
     public void stop() {
         this.changeMonitor.stop();
     }

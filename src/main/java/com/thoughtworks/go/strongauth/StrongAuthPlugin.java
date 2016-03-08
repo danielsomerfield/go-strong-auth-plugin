@@ -24,17 +24,20 @@ public class StrongAuthPlugin implements GoPlugin {
     private Handlers handlers;
 
     public StrongAuthPlugin() {
-
+        LOGGER.info("Creating plugin: " + this);
     }
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        try {
-            componentFactory = ComponentFactory.create(goApplicationAccessor, goPluginIdentifier);
-            this.handlers = componentFactory.handlers();
-        } catch (Exception e) {
-            LOGGER.error("Failed to create component factory", e);
-            throw e;
+        if (handlers == null) {
+            LOGGER.info(String.format("Initializing accessor %s with %s.", this, goApplicationAccessor));
+            try {
+                componentFactory = ComponentFactory.create(goApplicationAccessor, goPluginIdentifier);
+                this.handlers = componentFactory.handlers();
+            } catch (Exception e) {
+                LOGGER.error("Failed to create component factory", e);
+                throw e;
+            }
         }
     }
 

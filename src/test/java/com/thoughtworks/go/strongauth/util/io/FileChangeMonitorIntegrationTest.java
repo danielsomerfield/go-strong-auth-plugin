@@ -48,6 +48,7 @@ public class FileChangeMonitorIntegrationTest {
                 eventWrapper.set(event);
             }
         });
+        fileChangeMonitor.start();
         setFileContents("foo2");
 
         waitUntil(new Supplier<Boolean>() {

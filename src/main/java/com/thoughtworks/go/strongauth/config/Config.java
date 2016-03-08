@@ -6,6 +6,7 @@ import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.strongauth.ComponentFactory;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigFileMonitor;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
 import com.thoughtworks.go.strongauth.handlers.AuthenticationHandler;
 import com.thoughtworks.go.strongauth.handlers.Handlers;
@@ -68,10 +69,14 @@ public class Config {
     }
 
     @Bean
-    InputStreamSource inputStreamSource(final GoAPI goAPI) {
-        return new FileChangeMonitor(goAPI.getPluginConfiguration().principalSourceFile());
+    ConfigurationMonitor configurationMonitor(final GoAPI goAPI) {
+        return new ConfigurationMonitor(goAPI);
     }
 
+    @Bean
+    InputStreamSource inputStreamSource(final ConfigurationMonitor configurationMonitor) {
+        return new ConfigFileMonitor(configurationMonitor);
+    }
 
     @Bean
     GoAPI goAPI(@SuppressWarnings("SpringJavaAutowiringInspection") final GoPluginIdentifier goPluginIdentifier,
