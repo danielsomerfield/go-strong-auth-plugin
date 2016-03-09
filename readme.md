@@ -49,9 +49,20 @@ The implementation currently assumes that any supported hash algorithm will take
 there are plans to make this mechanism more flexible to support other algorithm types through custom configuration parsers.
 
 ## Creating password entries
-At this point, you are on your own to create entries. See the CryptoScratch class for an example of how to programmatically
-create an entry. I will be providing a command line tool shortly for modifying entries and am considering whether to build
-something into the UI.
+A python-based CLI is provided for generating entries. Currently it only supports PBKDF2WithHmacSHA1 with a 256 bit key size
+and 10,000 iterations. You can tweak the script if you want to change the configuration. Install the CLI as follows:
+
+    cd go_strong_auth_cli
+    pip install .
+
+Then you can use the CLI with the generate_entry command as follows:
+
+    ╰─➤ generate_entry
+
+    Username: aUser
+    Password: ******
+
+    aUser:437ce21f5faa936934b24eb46af0197e5467fa85bd1f549951865950a8e55c8a:ZSIH77NB3VK5I5NOXJA6:PBKDF2WithHmacSHA1(10000,256)
 
 # Building
 You can build the plugin by executing `./gradlew jar` from the project root directory.
@@ -68,7 +79,6 @@ The plugin will be built at build/libs/e2e-VERSION.jar
 
 TODO
 ----
-- provide CLI for generating entries
 - strong default algorithm, keysize, and iteration count, if not specified
 - more flexible hash algorithm configuration
 - add configuration for how often to check file for reload, based on env variable, for testing purposes

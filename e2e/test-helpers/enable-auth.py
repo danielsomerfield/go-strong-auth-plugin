@@ -6,7 +6,7 @@ import time
 config = ET.parse("/etc/go/cruise-config.xml")
 server = config.getroot()[0]
 if len(server.findall("security")) == 0:
-    securityNode = ET.fromstring("<security><passwordFile path=\"/etc/go/password\" /></security>")
+    securityNode = ET.fromstring("<security><passwordFile path=\"/etc/go/password-fake\" /></security>")
     server.append(securityNode)
     config.write("/etc/go/cruise-config.xml")
     time.sleep(5) #TODO: can we find a better way to do this?
