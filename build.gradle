@@ -1,7 +1,15 @@
+import static java.lang.System.getenv
+
 group 'com.thoughtworks.go'
-version '1.0-SNAPSHOT'
+version = generateVersion()
 
 apply plugin: 'java'
+
+def static generateVersion() {
+    def versionNumber = '1.0'
+    def buildName = getenv("CI") == 'true' ? getenv("SNAP_PIPELINE_COUNTER") : "${System.currentTimeMillis()}-DEV"
+    "$versionNumber-$buildName"
+}
 
 sourceCompatibility = 1.7
 
