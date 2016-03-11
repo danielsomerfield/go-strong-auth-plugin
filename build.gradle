@@ -40,7 +40,10 @@ jar {
         copy {
             into "$buildDir/resources/main/lib"
             from configurations.runtime
+            from "LICENSE"
+            from "readme.md"
         }
+
     }
     doLast {
         copy {
