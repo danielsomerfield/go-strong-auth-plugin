@@ -81,12 +81,12 @@ public String getGoHost() {
 
 def waitForGo() {
     waitFor {
-        ping("http://${goHost}:${8153}")
+        ping("http://${goHost}:8153")
     }
 }
 
 //TODO: move utilities
-def getWaitTimeout() { 1000 * 60 }
+def getWaitTimeout() { 1000 * 60 * 2 }
 
 def waitFor(closure) {
     long timeout = System.currentTimeMillis() + waitTimeout;
