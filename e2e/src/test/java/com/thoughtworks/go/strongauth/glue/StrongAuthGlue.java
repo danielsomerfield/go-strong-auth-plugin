@@ -75,7 +75,7 @@ public class StrongAuthGlue {
     }
 
     private String getGoHost() {
-        return "192.168.99.100";
+        return System.getProperty("GO_CD_HOST", "172.17.0.2");
     }
 
     private String getPort() {
@@ -95,7 +95,8 @@ public class StrongAuthGlue {
     public void iAmRedirectedToTheLoginScreen() throws Throwable {
         assertThat(response.getStatusLine().getStatusCode(), is(HttpStatus.SC_MOVED_TEMPORARILY));
         assertThat(response.getFirstHeader("Location"), is(notNullValue()));
-        assertThat(response.getFirstHeader("Location").getValue(), is("http://192.168.99.100:8153/go/auth/login"));
+        final String host = System.getProperty("GO_CD_HOST", "172.17.0.2");
+        assertThat(response.getFirstHeader("Location").getValue(), is(format("http://%s:8153/go/auth/login", host)));
     }
 
     @Given("^There are no existing users$")

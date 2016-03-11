@@ -33,6 +33,7 @@ dependencies {
 
 task executeFeatures(type: JavaExec, dependsOn: 'startGoImage') {
     main = "cucumber.api.cli.Main"
+    systemProperties = ["GO_CD_HOST" : getGoHost()]
     classpath += files(sourceSets.test.runtimeClasspath)
     args += [
             "--strict", "-t", "~@NYI",
@@ -44,6 +45,7 @@ task executeFeatures(type: JavaExec, dependsOn: 'startGoImage') {
 
 task executeFeaturesDev(type: JavaExec) {
     main = "cucumber.api.cli.Main"
+    systemProperties = ["GO_CD_HOST" : getGoHost()]
     classpath += files(sourceSets.test.runtimeClasspath)
     args += [
             "--strict", "-t", "~@NYI",
@@ -74,7 +76,7 @@ task prepareGoImage(type: Exec, dependsOn: 'stopGoImage') {
 executeFeatures.finalizedBy("cleanup")
 
 public String getGoHost() {
-    return "192.168.99.100";
+    return System.getProperty("GO_CD_HOST", "172.17.0.2");
 }
 
 def waitForGo() {
@@ -105,7 +107,6 @@ import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.HttpClients
 
 def ping(String url) {
-
     try {
         logger.debug("Pinging app with url ${url}")
         HttpUriRequest get = RequestBuilder.get().setConfig(RequestConfig.custom()
