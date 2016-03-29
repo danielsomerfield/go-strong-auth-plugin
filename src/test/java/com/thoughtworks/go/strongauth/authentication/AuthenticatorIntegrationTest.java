@@ -1,10 +1,14 @@
 package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.thoughtworks.go.strongauth.authentication.hash.PBESpecHashProvider;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -15,7 +19,11 @@ import static org.mockito.Mockito.when;
 public class AuthenticatorIntegrationTest {
 
     private PrincipalDetailSource principalDetailSource = mock(PrincipalDetailSource.class);
-    private Authenticator authenticator = new Authenticator(principalDetailSource);
+    private List<? extends HashProvider> hashProviders = ImmutableList.of(
+            new PBESpecHashProvider()
+    );
+
+    private Authenticator authenticator = new Authenticator(principalDetailSource, hashProviders);
 
     @Before
     @SneakyThrows

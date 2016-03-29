@@ -1,11 +1,14 @@
 package com.thoughtworks.go.strongauth.config;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.thoughtworks.go.plugin.api.GoApplicationAccessor;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.strongauth.ComponentFactory;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
+import com.thoughtworks.go.strongauth.authentication.HashProvider;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.authentication.hash.PBESpecHashProvider;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigFileMonitor;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
 import com.thoughtworks.go.strongauth.handlers.AuthenticationHandler;
@@ -13,12 +16,13 @@ import com.thoughtworks.go.strongauth.handlers.Handlers;
 import com.thoughtworks.go.strongauth.handlers.PluginConfigurationHandler;
 import com.thoughtworks.go.strongauth.handlers.PluginSettingsHandler;
 import com.thoughtworks.go.strongauth.util.InputStreamSource;
-import com.thoughtworks.go.strongauth.util.io.FileChangeMonitor;
 import com.thoughtworks.go.strongauth.wire.GoAuthenticationRequestDecoder;
 import com.thoughtworks.go.strongauth.wire.GoUserEncoder;
 import com.thoughtworks.go.strongauth.wire.PluginConfigurationDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class Config {
@@ -54,8 +58,16 @@ public class Config {
     }
 
     @Bean
-    Authenticator authenticator(final PrincipalDetailSource principalDetailSource) {
-        return new Authenticator(principalDetailSource);
+    Authenticator authenticator(
+            final PrincipalDetailSource principalDetailSource) {
+        return new Authenticator(principalDetailSource, hashProviders());
+    }
+
+    @Bean
+    List<? extends HashProvider> hashProviders() {
+        return ImmutableList.of(
+                new PBESpecHashProvider()
+        );
     }
 
     @Bean

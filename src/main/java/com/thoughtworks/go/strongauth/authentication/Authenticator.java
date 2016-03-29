@@ -2,9 +2,7 @@ package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.thoughtworks.go.plugin.api.logging.Logger;
-import com.thoughtworks.go.strongauth.authentication.hash.PBESpecHashProvider;
 import com.thoughtworks.go.strongauth.util.Constants;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -13,17 +11,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.thoughtworks.util.Functional.flatMap;
-import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
 public class Authenticator {
 
     public final String pluginId = Constants.PLUGIN_ID;
     private static final Logger LOGGER = Logger.getLoggerFor(Authenticator.class);
-    private List<? extends HashProvider> hashProviders = ImmutableList.of(new PBESpecHashProvider());
+    private final List<? extends HashProvider> hashProviders;
 
-    public Authenticator(PrincipalDetailSource principalDetailSource) {
+    public Authenticator(
+            final PrincipalDetailSource principalDetailSource,
+            final List<? extends HashProvider> hashProviders
+    ) {
         this.principalDetailSource = principalDetailSource;
+        this.hashProviders = hashProviders;
     }
 
     private PrincipalDetailSource principalDetailSource;
