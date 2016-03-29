@@ -3,9 +3,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 docker ps -a -f "name=go-cd" | grep go-cd
 if [ $? == 0 ]; then
+    echo "stopping go container"
     docker rm -f go-cd
-    echo "stopping go image"
 else
-    echo "go image not running"
+    echo "go container not running"
 fi
-

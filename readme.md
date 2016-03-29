@@ -80,7 +80,6 @@ The plugin will be built at build/libs/e2e-VERSION.jar
 TODO
 ----
 - make script smarter about finding Go CD host to connect to
-- delete docker image when finished with e2e test
 - strong default algorithm, keysize, and iteration count, if not specified
 - more flexible hash algorithm configuration
 - add configuration for how often to check file for reload, based on env variable, for testing purposes
