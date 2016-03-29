@@ -12,7 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AuthenticatorTest {
+public class AuthenticatorIntegrationTest {
 
     private PrincipalDetailSource principalDetailSource = mock(PrincipalDetailSource.class);
     private Authenticator authenticator = new Authenticator(principalDetailSource);
