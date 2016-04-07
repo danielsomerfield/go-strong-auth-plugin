@@ -9,6 +9,7 @@ import com.thoughtworks.go.strongauth.util.InputStreamSource;
 import com.thoughtworks.go.strongauth.util.io.SourceChangeEvent;
 import com.thoughtworks.go.strongauth.util.io.SourceChangeListener;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,7 +50,8 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
     private void loadSource(InputStream passwordFile) throws IOException {
         principalDetails.clear();
         String line;
-        while ((line = toBufferedReader(new InputStreamReader(passwordFile)).readLine()) != null) {
+        final BufferedReader bufferedReader = toBufferedReader(new InputStreamReader(passwordFile));
+        while ((line = bufferedReader.readLine()) != null) {
             Optional<PrincipalDetail> maybeDetail = parse(line);
             if (maybeDetail.isPresent()) {
                 PrincipalDetail detail = maybeDetail.get();

@@ -49,8 +49,8 @@ The implementation currently assumes that any supported hash algorithm will take
 there are plans to make this mechanism more flexible to support other algorithm types through custom configuration parsers.
 
 ## Creating password entries
-A python-based CLI is provided for generating entries. Currently it only supports PBKDF2WithHmacSHA1 with a 256 bit key size
-and 10,000 iterations. You can tweak the script if you want to change the configuration. Install the CLI as follows:
+A python-based CLI is provided for generating entries. Currently it only supports bcrypt.
+You can tweak the script if you want to change the configuration. Install the CLI as follows:
 
     cd go_strong_auth_cli
     pip install .
@@ -62,7 +62,9 @@ Then you can use the CLI with the generate_entry command as follows:
     Username: aUser
     Password: ******
 
-    aUser:437ce21f5faa936934b24eb46af0197e5467fa85bd1f549951865950a8e55c8a:ZSIH77NB3VK5I5NOXJA6:PBKDF2WithHmacSHA1(10000,256)
+    aUser:$2a$12$DfogsROFDSLnWqEyKW2i8ep4ILtkhJ6h2a7heXJtgN2aKVjl0B6ZS::bcrypt
+
+Notice that the salt fields is empty because bcrypt builds the salt into the hash string.
 
 # Building
 You can build the plugin by executing `./gradlew jar` from the project root directory.
@@ -118,9 +120,10 @@ Go CD Core Recommendations
 Road Map (subject to change)
 --------
 0.3 - add migration support for legacy files
-0.2 - added support for different hash mechanisms via factory
-    - add factory that uses MessageDigests 
 
 Release Notes
 -------------
+0.2 - added support for different hash mechanisms via provider interface
+    - add providers that uses bcrypt or built-in Java PBE
+    - changed python script to use bcrypt format
 0.1 - initial release with support for PBE-based hashing

@@ -15,5 +15,6 @@ public class CryptoScratch {
 //        System.out.println(BCrypt.gensalt(10));
 //        System.out.println(BCrypt.gensalt(5));
         System.out.println(BCrypt.hashpw("pazzword123", "$2a$10$xannybUjnYmLhbfwHsd3de"));
+        System.out.println(BCrypt.checkpw("password", "$2a$12$BCxhWyRVAHBCDxzv1.Bnl.u2xYGnT6PwpH3wqStyVtmBODyfREPE."));
     }
 }
