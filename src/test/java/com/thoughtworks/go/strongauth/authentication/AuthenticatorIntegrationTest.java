@@ -2,10 +2,12 @@ package com.thoughtworks.go.strongauth.authentication;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.thoughtworks.go.strongauth.authentication.hash.BCryptProvider;
 import com.thoughtworks.go.strongauth.authentication.hash.PBESpecHashProvider;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -20,7 +22,8 @@ public class AuthenticatorIntegrationTest {
 
     private PrincipalDetailSource principalDetailSource = mock(PrincipalDetailSource.class);
     private List<? extends HashProvider> hashProviders = ImmutableList.of(
-            new PBESpecHashProvider()
+            new PBESpecHashProvider(),
+            new BCryptProvider()
     );
 
     private Authenticator authenticator = new Authenticator(principalDetailSource, hashProviders);
@@ -44,10 +47,37 @@ public class AuthenticatorIntegrationTest {
                         Base64.encodeBase64String("salt".getBytes("UTF-8")),
                         "PBKDF2WithHmacSHA1(5, 256)"
                 )));
+
+
+        when(principalDetailSource.byUsername("usingBCrypt")).thenReturn(
+                Optional.of(new PrincipalDetail(
+                        "usingBCrypt",
+                        "$2a$10$xannybUjnYmLhbfwHsd3deJXBRaBG7.U.t/Jl6gMEHMkod7U/XTs6",
+                        "",
+                        "bcrypt"
+                )));
     }
 
     @Test
-    public void testAuthenticateUserSuccess() {
+    public void testAuthenticateUserSuccessBCrypt() {
+        String username = "usingBCrypt";
+        String password = "pazzword123";
+
+        Optional<Principal> maybePrincipal = authenticator.authenticate(username, password);
+        assertThat(maybePrincipal, is(Optional.of(new Principal("usingBCrypt"))));
+    }
+
+    @Test
+    public void testAuthenticateUserFailureBCrypt() {
+        String username = "usingBCrypt";
+        String password = "pazzword1234";
+
+        Optional<Principal> maybePrincipal = authenticator.authenticate(username, password);
+        assertThat(maybePrincipal, is(Optional.<Principal>absent()));
+    }
+
+    @Test
+    public void testAuthenticateUserSuccessPBKDF2() {
         String username = "username123";
         String password = "pazzword123";
 

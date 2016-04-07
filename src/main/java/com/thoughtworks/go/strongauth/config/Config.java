@@ -8,6 +8,7 @@ import com.thoughtworks.go.strongauth.ComponentFactory;
 import com.thoughtworks.go.strongauth.authentication.Authenticator;
 import com.thoughtworks.go.strongauth.authentication.HashProvider;
 import com.thoughtworks.go.strongauth.authentication.PrincipalDetailSource;
+import com.thoughtworks.go.strongauth.authentication.hash.BCryptProvider;
 import com.thoughtworks.go.strongauth.authentication.hash.PBESpecHashProvider;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigFileMonitor;
 import com.thoughtworks.go.strongauth.authentication.principalDetailSources.ConfigurableUserPrincipalDetailSource;
@@ -66,7 +67,8 @@ public class Config {
     @Bean
     List<? extends HashProvider> hashProviders() {
         return ImmutableList.of(
-                new PBESpecHashProvider()
+                new PBESpecHashProvider(),
+                new BCryptProvider()
         );
     }
 

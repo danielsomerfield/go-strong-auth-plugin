@@ -16,16 +16,25 @@ public class ConfigurableUserPrincipalDetailSourceTest {
 
     @Test
     public void testFindExistingUser() {
-        InputStream passwordFile = IOUtils.toInputStream("username1:satlz:hazHash:PBKDF2WithHmacSHA1(5000, 64)");
+        InputStream passwordFile = IOUtils.toInputStream("username1:hazsh:salty:PBKDF2WithHmacSHA1(5000, 64)");
         PrincipalDetailSource principalDetailSource = new ConfigurableUserPrincipalDetailSource(new BasicInputStreamSource(passwordFile));
         Optional<PrincipalDetail> maybePrincipalDetail = principalDetailSource.byUsername("username1");
         assertThat(maybePrincipalDetail, is(Optional.of(
-                new PrincipalDetail("username1", "satlz", "hazHash", "PBKDF2WithHmacSHA1(5000, 64)"))));
+                new PrincipalDetail("username1", "hazsh", "salty", "PBKDF2WithHmacSHA1(5000, 64)"))));
+    }
+
+    @Test
+    public void testFindExistingUserWithNotSalt() {
+        InputStream passwordFile = IOUtils.toInputStream("username1:hazsh::PBKDF2WithHmacSHA1(5000, 64)");
+        PrincipalDetailSource principalDetailSource = new ConfigurableUserPrincipalDetailSource(new BasicInputStreamSource(passwordFile));
+        Optional<PrincipalDetail> maybePrincipalDetail = principalDetailSource.byUsername("username1");
+        assertThat(maybePrincipalDetail, is(Optional.of(
+                new PrincipalDetail("username1", "hazsh", "", "PBKDF2WithHmacSHA1(5000, 64)"))));
     }
 
     @Test
     public void testFindMissingUser() {
-        InputStream passwordFile = IOUtils.toInputStream("username1:satlz:hazHash:PBKDF2WithHmacSHA1(5000, 64)");
+        InputStream passwordFile = IOUtils.toInputStream("username1:hazsh:salty:PBKDF2WithHmacSHA1(5000, 64)");
         PrincipalDetailSource principalDetailSource = new ConfigurableUserPrincipalDetailSource(new BasicInputStreamSource(passwordFile));
         Optional<PrincipalDetail> maybePrincipalDetail = principalDetailSource.byUsername("missingUser");
         assertThat(maybePrincipalDetail, is(Optional.<PrincipalDetail>absent()));

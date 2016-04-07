@@ -17,11 +17,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.toBufferedReader;
 
 public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSource {
     private final Map<String, PrincipalDetail> principalDetails = new HashMap<>();
-    public static final Pattern DETAIL_PATTERN = Pattern.compile("^([^:]+):([^:]+):([^:]+):([^:]+)$");
+    public static final Pattern DETAIL_PATTERN = Pattern.compile("^([^:]+):([^:]+):([^:]*):([^:]+)$");
 
     private static final Logger LOGGER = Logger.getLoggerFor(ConfigurableUserPrincipalDetailSource.class);
     public final String pluginId = Constants.PLUGIN_ID;
@@ -67,6 +68,7 @@ public class ConfigurableUserPrincipalDetailSource implements PrincipalDetailSou
                     matcher.group(4))
             );
         } else {
+            LOGGER.warn(format("Failed to parse password file line %s", line));
             return Optional.absent();
         }
     }

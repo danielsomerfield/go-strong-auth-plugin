@@ -102,12 +102,20 @@ public class StrongAuthGlue {
     @Given("^There are no existing users$")
     public void thereAreNoExistingUsers() throws Throwable {
         testHelpers.clearAuthFile();
+        Thread.sleep(3000); //Can we find a better way?
     }
 
-    @Given("^A login exists for \"([^\"]*)\", \"([^\"]*)\"$")
-    public void aLoginExistsFor(String username, String password) throws Throwable {
+    @Given("^A login exists for \"([^\"]*)\", \"([^\"]*)\" using PBKDF2$")
+    public void aLoginExistsWithPBKDF2For(String username, String password) throws Throwable {
         testHelpers.clearAuthFile();
-        testHelpers.createPasswordEntryFor(username, password);
+        testHelpers.createPBKDF2PasswordEntryFor(username, password);
+        Thread.sleep(3000); //Can we find a better way?
+    }
+
+    @Given("^A login exists for \"([^\"]*)\", \"([^\"]*)\" using bcrypt$")
+    public void aLoginExistsWithBCryptFor(String username, String password) throws Throwable {
+        testHelpers.clearAuthFile();
+        testHelpers.createBCryptPasswordEntryFor(username, password);
         Thread.sleep(3000); //Can we find a better way?
     }
 

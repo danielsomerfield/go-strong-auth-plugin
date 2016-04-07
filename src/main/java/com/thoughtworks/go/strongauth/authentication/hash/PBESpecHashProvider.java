@@ -8,6 +8,7 @@ import com.thoughtworks.go.strongauth.authentication.PrincipalDetail;
 import com.thoughtworks.go.strongauth.util.Constants;
 import lombok.Value;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -26,24 +27,25 @@ public class PBESpecHashProvider implements HashProvider {
     private static final Pattern HASH_CONFIG_PATTERN = Pattern.compile("^(\\w+)\\((\\d+), (\\d+)\\)$");
 
     @Override
-    public Optional<byte[]> buildHash(final String hashConfigString, final String password, final PrincipalDetail principalDetail) {
+    public boolean validateHash(final String password, final PrincipalDetail principalDetail) {
         Optional<HashConfig> maybeHashConfig = parseHashConfig(principalDetail.getHashConfiguration());
-        return flatMap(maybeHashConfig, new Function<HashConfig, Optional<byte[]>>() {
+        return maybeHashConfig.transform(new Function<HashConfig, Boolean>() {
             @Override
-            public Optional<byte[]> apply(HashConfig hashConfig) {
+            public Boolean apply(HashConfig hashConfig) {
                 PBEKeySpec spec = new PBEKeySpec(
                         password.toCharArray(),
                         Base64.decodeBase64(principalDetail.getSalt()),
                         hashConfig.getIterations(),
                         hashConfig.getKeySize());
                 try {
-                    return Optional.of(SecretKeyFactory.getInstance(hashConfig.getAlgorithm()).generateSecret(spec).getEncoded());
+                    String encoded = Hex.encodeHexString(SecretKeyFactory.getInstance(hashConfig.getAlgorithm()).generateSecret(spec).getEncoded());
+                    return encoded.equals(principalDetail.getPasswordHash());
                 } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
                     LOGGER.warn("build hash", e);
-                    return Optional.absent();
+                    return false;
                 }
             }
-        });
+        }).or(false);
     }
 
     @Override

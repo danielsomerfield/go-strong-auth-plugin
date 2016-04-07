@@ -77,19 +77,6 @@ The plugin will be built at build/libs/e2e-VERSION.jar
 - Java 7 or later
 - Docker (to run end-to-end tests)
 
-TODO
-----
-- make script smarter about finding Go CD host to connect to
-- strong default algorithm, keysize, and iteration count, if not specified
-- more flexible hash algorithm configuration
-- add configuration for how often to check file for reload, based on env variable, for testing purposes
-- create UI for generating entries (?)
-
-Go CD Core Recommendations
---------------------------
-- Change behavior of auth extension so auth is enable by request for any auth plugin (rather than hard coded file and oauth)
-- Make logging api more delegate-friendly by making plugin id capable without constantly adding the static field
-
 License
 -------
 
@@ -110,6 +97,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ```
+
+TODO
+----
+- make script smarter about finding Go CD host to connect to
+- strong default algorithm, keysize, and iteration count, if not specified
+- more flexible hash algorithm configuration
+- add configuration for how often to check file for reload, based on env variable, for testing purposes
+- create UI for generating entries (?)
+
+Go CD Core Recommendations
+--------------------------
+- Change behavior of auth extension so auth is enable by request for any auth plugin (rather than hard coded file and oauth)
+    - IsSecurityEnabledVoter should delegate to plugins such that if any plugin returns true, then auth is enabled
+    - IsSecurityEnabledVoter.vote() -> AuthenticationPluginRegistry.getAuthenticationPlugins
+                                    -> AuthenticationExtension.isSecurityEnabled(): makes request with message to check auth enabled
+
+- Make logging api more delegate-friendly by making plugin id capable without constantly adding the static field
+
+Road Map (subject to change)
+--------
+0.3 - add migration support for legacy files
+0.2 - added support for different hash mechanisms via factory
+    - add factory that uses MessageDigests 
 
 Release Notes
 -------------

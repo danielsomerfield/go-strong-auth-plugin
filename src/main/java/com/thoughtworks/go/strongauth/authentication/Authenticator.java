@@ -5,9 +5,7 @@ import com.google.common.base.Optional;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.strongauth.util.Constants;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.thoughtworks.util.Functional.flatMap;
@@ -45,34 +43,21 @@ public class Authenticator {
     }
 
     private Optional<Principal> toPrincipal(final PrincipalDetail principalDetail, final String password) {
-        final Optional<? extends byte[]> maybeHashBytes = createHashBytes(principalDetail.getHashConfiguration(), password, principalDetail);
+        Optional<? extends HashProvider> maybeHashProvider = getHashProvider(principalDetail.getHashConfiguration());
+
         return flatMap(
-                maybeHashBytes,
-                new Function<byte[], Optional<Principal>>() {
+                maybeHashProvider,
+                new Function<HashProvider, Optional<Principal>>() {
                     @Override
-                    public Optional<Principal> apply(byte[] key) {
-                        try {
-                            return (Arrays.equals(Hex.decodeHex(principalDetail.getPasswordHash().toCharArray()), key) ?
-                                    Optional.of(new Principal(principalDetail.getUsername())) :
-                                    Optional.<Principal>absent());
-                        } catch (DecoderException e) {
-                            return Optional.absent();
-                        }
+                    public Optional<Principal> apply(HashProvider hashProvider) {
+                        return hashProvider.validateHash(password, principalDetail) ?
+                                Optional.of(new Principal(principalDetail.getUsername())) :
+                                Optional.<Principal>absent();
                     }
                 }
         );
     }
 
-    private Optional<byte[]> createHashBytes(final String hashConfig, final String password,
-                                             final PrincipalDetail principalDetail) {
-        Optional<? extends HashProvider> maybeHashFactory = getHashProvider(hashConfig);
-        return flatMap(maybeHashFactory, new Function<HashProvider, Optional<byte[]>>() {
-            @Override
-            public Optional<byte[]> apply(HashProvider hashProvider) {
-                return hashProvider.buildHash(hashConfig, password, principalDetail);
-            }
-        });
-    }
 
     private Optional<? extends HashProvider> getHashProvider(final String hashConfig) {
         for (HashProvider provider : hashProviders) {

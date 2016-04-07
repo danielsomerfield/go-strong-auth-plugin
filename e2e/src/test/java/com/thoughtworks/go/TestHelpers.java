@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -48,13 +49,20 @@ public class TestHelpers {
         }
     }
 
-    public void createPasswordEntryFor(String username, String password) {
+    public void createPBKDF2PasswordEntryFor(String username, String password) {
         int iterations = 10000;
         int keyLength = 256;
         byte[] salt = createSalt();
         String saltString = Base64.encodeBase64String(salt);
         String hash = createHash(salt, password, iterations, keyLength);
         String entry = format("%s:%s:%s:%s(%s, %s)", username, hash, saltString, "PBKDF2WithHmacSHA1", String.valueOf(iterations), String.valueOf(keyLength));
+        executeHelper("insert-password-entry.py", entry);
+    }
+
+    public void createBCryptPasswordEntryFor(String username, String password) {
+        String saltString = BCrypt.gensalt();
+        String hash = BCrypt.hashpw(password, saltString);
+        String entry = format("%s:%s::%s", username, hash, "bcrypt");
         executeHelper("insert-password-entry.py", entry);
     }
 
